@@ -1,5 +1,9 @@
 # Flath – Manage Your Time, Master Your Journey
 
+<p align="center">
+  <img src="assets/flath-logo.png" alt="Flath Logo" width="400"/>
+</p>
+
 Duc & Khai's Journey to Create a Fantastic, Wonderful, Significant, Magnificent, Outstanding, Class of Titans and World Class Project to manage time and grow ourselves
 
 ## Day 1 - Oct 5, 2025
