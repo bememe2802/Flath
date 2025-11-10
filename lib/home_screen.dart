@@ -79,6 +79,78 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             )
           ),
+          Container(
+            decoration: BoxDecoration(
+              color: FlathColors.card,
+                borderRadius: BorderRadius.circular(20.0)
+            ),
+            padding: const EdgeInsets.all(16.0),
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.emoji_events_outlined,
+                      fontWeight: FontWeight.w500,
+                      color: FlathColors.accent,
+                    ),
+                    const SizedBox(width: 10.0),
+                    Text(
+                      "Pinned Mission",
+                      style: TextStyle(
+                        fontSize: 17,
+                        color: FlathColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )
+                  ],
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 0.0, vertical: 15.0),
+                  child:
+                    Text(
+                      "Complete Python Course",
+                      style: TextStyle(
+                        fontSize: 23,
+                        color: FlathColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    )
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Progress",
+                      style: TextStyle(
+                        fontSize: 15.0,
+                        color: FlathColors.textSecondary,
+                          fontWeight: FontWeight.w500
+                      ),
+                    ),
+                    Text(
+                      "70%",
+                      style: TextStyle(
+                        fontSize: 17.0,
+                        color: FlathColors.textPrimary,
+                        fontWeight: FontWeight.w900
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10.0),
+                LinearProgressIndicator(
+                  value: 0.7,
+                  backgroundColor: Color(0xFFe8ded3),
+                  color: FlathColors.accent,
+                  minHeight: 10,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ],
+            ),
+          )
         ],
       ),
       floatingActionButton: FloatingActionButton(
