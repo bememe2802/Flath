@@ -150,6 +150,76 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
+            child:
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  InkWell(
+                    onTap: () {},
+                    borderRadius: BorderRadius.circular(20.0),
+                    child:
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.filter_list,
+                              color: FlathColors.iconGray,
+                            ),
+                            const SizedBox(width: 7.0),
+                            Text(
+                              "Filter: All",
+                              style: TextStyle(
+                                  fontSize: 15.5,
+                                  color: FlathColors.textSecondary,
+                                  fontWeight: FontWeight.w600
+                              ),
+                            )
+                          ],
+                        ),
+                      )
+                  ),
+                  InkWell(
+                    onTap: () {},
+                    borderRadius: BorderRadius.circular(20.0),
+                    child: Padding(
+                      padding: EdgeInsetsGeometry.symmetric(horizontal: 16.0, vertical: 12.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.swap_vert_rounded,
+                            color: FlathColors.iconGray,
+                          ),
+                          // const SizedBox(width:.0),
+                          Text(
+                            "Sort: Due Date",
+                            style: TextStyle(
+                                fontSize: 15.5,
+                                color: FlathColors.textSecondary,
+                                fontWeight: FontWeight.w600
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  ),
+                ],
+              )
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
+            child:
+              Text(
+                "TODAY",
+                style: TextStyle(
+                  fontSize: 25,
+                  color: FlathColors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
           )
         ],
       ),
