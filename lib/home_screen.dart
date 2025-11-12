@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flath/theme/colors.dart';
+import '/models/task.dart';
 
 class HomeScreen extends StatefulWidget{
   const HomeScreen({super.key});
@@ -10,6 +11,11 @@ class HomeScreen extends StatefulWidget{
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  final List<Task> todayTasks = [
+    Task(title: 'Study KNN Algorithm', isDone: true, id: '1'),
+    Task(id: '2', title: 'Plan weekly meals'),
+    Task(id: '3', title: 'Data cleaning for project'),
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -220,7 +226,29 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-          )
+          ),
+          ...todayTasks.map((task) => CheckboxListTile(
+            value: task.isDone,
+            onChanged: (bool? newValue){
+              setState(() {
+                final int index = todayTasks.indexOf(task);
+                final Task newTask = task.copyWith(null, null, newValue!);
+                if (index != -1) {
+                  todayTasks[index] = newTask;
+                }
+              });
+            },
+            controlAffinity: ListTileControlAffinity.leading,
+            title: Text(
+              task.title,
+              style: TextStyle(
+
+              ),
+            ),
+            activeColor: FlathColors.accent,
+            checkColor: FlathColors.background,
+          )).toList(),
+
         ],
       ),
       floatingActionButton: FloatingActionButton(
