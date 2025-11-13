@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flath/theme/colors.dart';
 import '/models/task.dart';
 
-class HomeScreen extends StatefulWidget{
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
@@ -36,43 +36,48 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(width: 8.0),
                     Icon(
-                        Icons.calendar_month_rounded,
-                        size: 23,
+                      Icons.calendar_month_rounded,
+                      size: 23,
                       color: FlathColors.iconGray,
                     ),
                   ],
                 ),
                 const SizedBox(width: 90.0),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10.0,
+                    vertical: 8.0,
+                  ),
                   decoration: BoxDecoration(
                     color: FlathColors.card,
                     borderRadius: BorderRadius.circular(17.0),
                   ),
-                  child:
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Icon(
-                          Icons.local_fire_department_outlined,
-                          color: FlathColors.accent,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Icon(
+                        Icons.local_fire_department_outlined,
+                        color: FlathColors.accent,
+                        fontWeight: FontWeight.w900,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 5.0),
+                      Text(
+                        "30",
+                        style: TextStyle(
+                          fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          size: 16,
                         ),
-                        const SizedBox(width: 5.0),
-                        Text(
-                          "30",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        )
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                ),
                 const SizedBox(width: 10.0),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 8.0,
+                  ),
                   decoration: BoxDecoration(
                     color: FlathColors.card,
                     borderRadius: BorderRadius.circular(90.0),
@@ -83,12 +88,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ],
-            )
+            ),
           ),
           Container(
             decoration: BoxDecoration(
               color: FlathColors.card,
-                borderRadius: BorderRadius.circular(20.0)
+              borderRadius: BorderRadius.circular(20.0),
             ),
             padding: const EdgeInsets.all(16.0),
             margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -110,20 +115,22 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: FlathColors.textSecondary,
                         fontWeight: FontWeight.w600,
                       ),
-                    )
+                    ),
                   ],
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 0.0, vertical: 15.0),
-                  child:
-                    Text(
-                      "Complete Python Course",
-                      style: TextStyle(
-                        fontSize: 23,
-                        color: FlathColors.textPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    )
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 0.0,
+                    vertical: 15.0,
+                  ),
+                  child: Text(
+                    "Complete Python Course",
+                    style: TextStyle(
+                      fontSize: 23,
+                      color: FlathColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -133,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(
                         fontSize: 15.0,
                         color: FlathColors.textSecondary,
-                          fontWeight: FontWeight.w500
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
@@ -141,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(
                         fontSize: 17.0,
                         color: FlathColors.textPrimary,
-                        fontWeight: FontWeight.w900
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                   ],
@@ -159,107 +166,223 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
-            child:
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  InkWell(
-                    onTap: () {},
-                    borderRadius: BorderRadius.circular(20.0),
-                    child:
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.filter_list,
-                              color: FlathColors.iconGray,
-                            ),
-                            const SizedBox(width: 7.0),
-                            Text(
-                              "Filter: All",
-                              style: TextStyle(
-                                  fontSize: 15.5,
-                                  color: FlathColors.textSecondary,
-                                  fontWeight: FontWeight.w600
-                              ),
-                            )
-                          ],
-                        ),
-                      )
-                  ),
-                  InkWell(
-                    onTap: () {},
-                    borderRadius: BorderRadius.circular(20.0),
-                    child: Padding(
-                      padding: EdgeInsetsGeometry.symmetric(horizontal: 16.0, vertical: 12.0),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.swap_vert_rounded,
-                            color: FlathColors.iconGray,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                InkWell(
+                  onTap: () {},
+                  borderRadius: BorderRadius.circular(20.0),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.filter_list, color: FlathColors.iconGray),
+                        const SizedBox(width: 7.0),
+                        Text(
+                          "Filter: All",
+                          style: TextStyle(
+                            fontSize: 15.5,
+                            color: FlathColors.textSecondary,
+                            fontWeight: FontWeight.w600,
                           ),
-                          // const SizedBox(width:.0),
-                          Text(
-                            "Sort: Due Date",
-                            style: TextStyle(
-                                fontSize: 15.5,
-                                color: FlathColors.textSecondary,
-                                fontWeight: FontWeight.w600
-                            ),
-                          )
-                        ],
-                      ),
-                    )
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              )
+                ),
+                InkWell(
+                  onTap: () {},
+                  borderRadius: BorderRadius.circular(20.0),
+                  child: Padding(
+                    padding: EdgeInsetsGeometry.symmetric(
+                      horizontal: 16.0,
+                      vertical: 12.0,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.swap_vert_rounded,
+                          color: FlathColors.iconGray,
+                        ),
+                        // const SizedBox(width:.0),
+                        Text(
+                          "Sort: Due Date",
+                          style: TextStyle(
+                            fontSize: 15.5,
+                            color: FlathColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
-            child:
-              Text(
-                "TODAY",
-                style: TextStyle(
-                  fontSize: 25,
-                  color: FlathColors.textPrimary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-          ),
-          ...todayTasks.map((task) => CheckboxListTile(
-            value: task.isDone,
-            onChanged: (bool? newValue){
-              setState(() {
-                final int index = todayTasks.indexOf(task);
-                final Task newTask = task.copyWith(null, null, newValue!);
-                if (index != -1) {
-                  todayTasks[index] = newTask;
-                }
-              });
-            },
-            controlAffinity: ListTileControlAffinity.leading,
-            title: Text(
-              task.title,
+            child: Text(
+              "TODAY",
               style: TextStyle(
-
+                fontSize: 25,
+                color: FlathColors.textPrimary,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            activeColor: FlathColors.accent,
-            checkColor: FlathColors.background,
-          )).toList(),
-
+          ),
+          ...todayTasks
+              .map(
+                (task) => Column(
+                  children: [
+                    CheckboxListTile(
+                      value: task.isDone,
+                      onChanged: (bool? newValue) {
+                        setState(() {
+                          final int index = todayTasks.indexOf(task);
+                          final Task newTask = task.copyWith(
+                            null,
+                            null,
+                            newValue!,
+                          );
+                          if (index != -1) {
+                            todayTasks[index] = newTask;
+                          }
+                        });
+                      },
+                      controlAffinity: ListTileControlAffinity.leading,
+                      title: Text(
+                        task.title,
+                        style: TextStyle(
+                          fontSize: 17,
+                          decoration: task.isDone
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none,
+                          color: task.isDone
+                              ? FlathColors.textSecondary
+                              : FlathColors.textPrimary,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      activeColor: FlathColors.accent,
+                      checkColor: FlathColors.background,
+                    ),
+                    Divider(
+                      color: Color(0xFFe8ded3),
+                      thickness: 1.5,
+                      height: 1.0,
+                      indent: 16.0,
+                      endIndent: 16.0,
+                    ),
+                  ],
+                ),
+              )
+              .toList(),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: FlathColors.accent,
-        onPressed: () {  },
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+
+            isScrollControlled: true,
+
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(90.0),
+              )
+            ),
+
+            builder: (_) {
+              return Container(
+                padding: const EdgeInsets.all(24.0),
+                color: FlathColors.background,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF7F0E7), // nền pastel giống hình
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        // controller: _controller,
+                        // onSubmitted: (_) => _handleSubmit(),
+                        decoration: const InputDecoration(
+                          hintText: 'Enter task name...',
+                          border: InputBorder.none, // bỏ viền mặc định
+                          isCollapsed: true,       // cho chiều cao gọn
+                        ),
+                        style: const TextStyle(
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: (){},
+                      borderRadius: BorderRadius.circular(999),
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFE67676), // màu nút hồng
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.north, // mũi tên lên
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+                    Row(
+                      children: [
+                        buildTag(
+                          label: "Today",
+                          icon: Icons.calendar_today,
+                          onTap: () {
+                            print("Today tapped");
+                          },
+                        ),
+                        SizedBox(width: 12),
+                        buildTag(
+                          label: "Mission",
+                          icon: Icons.emoji_events,
+                          onTap: () {
+                            print("Mission tapped");
+                          },
+                        ),
+                        SizedBox(width: 12),
+                        buildTag(
+                          label: "Reminder",
+                          icon: Icons.notifications_none,
+                          onTap: () {
+                            print("Reminder tapped");
+                          },
+                        ),
+                      ],
+                    )
+
+                  ],
+                ),
+              );
+            },
+          );
+        },
         shape: CircleBorder(),
-        child: const Icon(
-          Icons.add,
-          color: FlathColors.background,
-          size: 30,
-        ),
+        child: const Icon(Icons.add, color: FlathColors.background, size: 30),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: FlathColors.card,
@@ -302,6 +425,39 @@ class _HomeScreenState extends State<HomeScreen> {
         showUnselectedLabels: true,
 
         type: BottomNavigationBarType.fixed,
+      ),
+    );
+  }
+
+  Widget buildTag({
+    required String label,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(30),
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: FlathColors.card,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: FlathColors.iconGray),
+            SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 15,
+                color: FlathColors.textSecondary,
+              ),
+            )
+          ],
+
+        ),
       ),
     );
   }
