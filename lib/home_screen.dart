@@ -11,11 +11,30 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+
+  final TextEditingController addNewTaskController = new TextEditingController();
+  final FocusNode addNewTaskFocusNode = new FocusNode();
+
   final List<Task> todayTasks = [
     Task(title: 'Study KNN Algorithm', isDone: true, id: '1'),
     Task(id: '2', title: 'Plan weekly meals'),
     Task(id: '3', title: 'Data cleaning for project'),
   ];
+
+  void addTask(String name){
+    final newTask = Task(id: DateTime.now().toIso8601String(), title: name);
+    setState(() {
+      todayTasks.add(newTask);
+    });
+  }
+
+  @override
+  void dispose() {
+    addNewTaskController.dispose();
+    addNewTaskFocusNode.dispose(); // <-- NHỚ HỦY NÓ
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -292,90 +311,120 @@ class _HomeScreenState extends State<HomeScreen> {
             isScrollControlled: true,
 
             shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(90.0),
-              )
+              borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
             ),
 
             builder: (_) {
-              return Container(
-                padding: const EdgeInsets.all(24.0),
-                color: FlathColors.background,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF7F0E7), // nền pastel giống hình
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        // controller: _controller,
-                        // onSubmitted: (_) => _handleSubmit(),
-                        decoration: const InputDecoration(
-                          hintText: 'Enter task name...',
-                          border: InputBorder.none, // bỏ viền mặc định
-                          isCollapsed: true,       // cho chiều cao gọn
-                        ),
-                        style: const TextStyle(
-                          fontSize: 15,
-                        ),
-                      ),
+              final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
+              return SingleChildScrollView(
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: FlathColors.background,
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
                     ),
-                    const SizedBox(width: 8),
-                    InkWell(
-                      onTap: (){},
-                      borderRadius: BorderRadius.circular(999),
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFE67676), // màu nút hồng
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.north, // mũi tên lên
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-                    Row(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        buildTag(
-                          label: "Today",
-                          icon: Icons.calendar_today,
-                          onTap: () {
-                            print("Today tapped");
-                          },
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF7F0E7),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  autofocus: true,
+                                  focusNode: addNewTaskFocusNode,
+                                  controller: addNewTaskController,
+                                  onSubmitted: (_) {
+                                    addTask(addNewTaskController.text.trim());
+                                    addNewTaskController.clear();
+                                    addNewTaskFocusNode.unfocus();
+                                    Navigator.pop(context);
+                                  },
+                                  decoration: const InputDecoration(
+                                    hintText: 'Enter task name...',
+                                    border: InputBorder.none,
+                                    isCollapsed: true,
+                                    hintStyle: TextStyle(
+                                      color: FlathColors.textSecondary,
+                                      fontSize: 17,
+                                    )
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 17,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap: () {
+                                  addTask(addNewTaskController.text.trim());
+                                  addNewTaskController.clear();
+                                  addNewTaskFocusNode.unfocus();
+                                  Navigator.pop(context);
+                                },
+                                borderRadius: BorderRadius.circular(999),
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: const BoxDecoration(
+                                    color: FlathColors.accent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.north,
+                                    size: 20,
+                                    fontWeight: FontWeight.w700,
+                                    color: FlathColors.background,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        SizedBox(width: 12),
-                        buildTag(
-                          label: "Mission",
-                          icon: Icons.emoji_events,
-                          onTap: () {
-                            print("Mission tapped");
-                          },
-                        ),
-                        SizedBox(width: 12),
-                        buildTag(
-                          label: "Reminder",
-                          icon: Icons.notifications_none,
-                          onTap: () {
-                            print("Reminder tapped");
-                          },
+                        const SizedBox(height: 12.0,),
+                        Row(
+                          children: [
+                            buildTag(
+                              label: "Today",
+                              icon: Icons.calendar_today,
+                              onTap: () {
+                                print("Today tapped");
+                              },
+                            ),
+                            SizedBox(width: 12),
+                            buildTag(
+                              label: "Mission",
+                              icon: Icons.emoji_events,
+                              onTap: () {
+                                print("Mission tapped");
+                              },
+                            ),
+                            SizedBox(width: 12),
+                            buildTag(
+                              label: "Reminder",
+                              icon: Icons.notifications_none,
+                              onTap: () {
+                                print("Reminder tapped");
+                              },
+                            ),
+                          ],
                         ),
                       ],
-                    )
-
-                  ],
+                    ),
+                  )
                 ),
               );
             },
@@ -450,13 +499,9 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(width: 6),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 15,
-                color: FlathColors.textSecondary,
-              ),
-            )
+              style: TextStyle(fontSize: 15, color: FlathColors.textSecondary, fontWeight: FontWeight.w500),
+            ),
           ],
-
         ),
       ),
     );
