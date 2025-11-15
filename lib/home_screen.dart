@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flath/theme/colors.dart';
 import '/models/task.dart';
+import 'package:flath/widgets/calendar_selector.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,8 +13,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  final TextEditingController addNewTaskController = new TextEditingController();
+  final TextEditingController addNewTaskController =
+      new TextEditingController();
   final FocusNode addNewTaskFocusNode = new FocusNode();
+
+  bool _showCalendar = false;
 
   final List<Task> todayTasks = [
     Task(title: 'Study KNN Algorithm', isDone: true, id: '1'),
@@ -21,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Task(id: '3', title: 'Data cleaning for project'),
   ];
 
-  void addTask(String name){
+  void addTask(String name) {
     final newTask = Task(id: DateTime.now().toIso8601String(), title: name);
     setState(() {
       todayTasks.add(newTask);
@@ -315,10 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
             builder: (_) {
-              final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-
-              return SingleChildScrollView(
-                child: Container(
+              return Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
                     color: FlathColors.background,
@@ -328,105 +329,144 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: EdgeInsets.only(
                       bottom: MediaQuery.of(context).viewInsets.bottom,
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF7F0E7),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  autofocus: true,
-                                  focusNode: addNewTaskFocusNode,
-                                  controller: addNewTaskController,
-                                  onSubmitted: (_) {
-                                    addTask(addNewTaskController.text.trim());
-                                    addNewTaskController.clear();
-                                    addNewTaskFocusNode.unfocus();
-                                    Navigator.pop(context);
-                                  },
-                                  decoration: const InputDecoration(
-                                    hintText: 'Enter task name...',
-                                    border: InputBorder.none,
-                                    isCollapsed: true,
-                                    hintStyle: TextStyle(
-                                      color: FlathColors.textSecondary,
-                                      fontSize: 17,
-                                    )
-                                  ),
-                                  style: const TextStyle(
-                                    fontSize: 17,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              InkWell(
-                                onTap: () {
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF7F0E7),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                autofocus: true,
+                                focusNode: addNewTaskFocusNode,
+                                controller: addNewTaskController,
+                                onSubmitted: (_) {
                                   addTask(addNewTaskController.text.trim());
                                   addNewTaskController.clear();
                                   addNewTaskFocusNode.unfocus();
                                   Navigator.pop(context);
                                 },
-                                borderRadius: BorderRadius.circular(999),
-                                child: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: const BoxDecoration(
-                                    color: FlathColors.accent,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.north,
-                                    size: 20,
-                                    fontWeight: FontWeight.w700,
-                                    color: FlathColors.background,
+                                decoration: const InputDecoration(
+                                  hintText: 'Enter task name...',
+                                  border: InputBorder.none,
+                                  isCollapsed: true,
+                                  hintStyle: TextStyle(
+                                    color: FlathColors.textSecondary,
+                                    fontSize: 17,
                                   ),
                                 ),
+                                style: const TextStyle(fontSize: 17),
                               ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12.0,),
-                        Row(
-                          children: [
-                            buildTag(
-                              label: "Today",
-                              icon: Icons.calendar_today,
-                              onTap: () {
-                                print("Today tapped");
-                              },
                             ),
-                            SizedBox(width: 12),
-                            buildTag(
-                              label: "Mission",
-                              icon: Icons.emoji_events,
+                            const SizedBox(width: 8),
+                            InkWell(
                               onTap: () {
-                                print("Mission tapped");
+                                addTask(addNewTaskController.text.trim());
+                                addNewTaskController.clear();
+                                addNewTaskFocusNode.unfocus();
+                                Navigator.pop(context);
                               },
-                            ),
-                            SizedBox(width: 12),
-                            buildTag(
-                              label: "Reminder",
-                              icon: Icons.notifications_none,
-                              onTap: () {
-                                print("Reminder tapped");
-                              },
+                              borderRadius: BorderRadius.circular(999),
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: const BoxDecoration(
+                                  color: FlathColors.accent,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.north,
+                                  size: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: FlathColors.background,
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  )
-                ),
-              );
+                      ),
+                      const SizedBox(height: 12.0),
+                      Row(
+                        children: [
+                          buildTag(
+                            label: "Today",
+                            icon: Icons.calendar_today,
+                            onTap: () {
+                              if (_showCalendar) {
+                                setState(() {
+                                  _showCalendar = false;
+                                });
+                                addNewTaskFocusNode.requestFocus();
+                              } else {
+                                addNewTaskFocusNode.unfocus();
+                                setState(() {
+                                  _showCalendar = true;
+                                });
+                              }
+                            },
+                          ),
+                          SizedBox(width: 12),
+                          buildTag(
+                            label: "Mission",
+                            icon: Icons.emoji_events,
+                            onTap: () {
+                              print("Mission tapped");
+                            },
+                          ),
+                          SizedBox(width: 12),
+                          buildTag(
+                            label: "Reminder",
+                            icon: Icons.notifications_none,
+                            onTap: () {
+                              print("Reminder tapped");
+                            },
+                          ),
+                        ],
+                      ),
+                      if (_showCalendar)
+                        CalendarSelector(
+                          key: const ValueKey("calendar"),
+                          onDateSelected: (selectedDate) {
+                            print("Đã chọn ngày từ Lịch: $selectedDate");
+                            setState(() {
+                              _showCalendar = false;
+                            });
+                            addNewTaskFocusNode.requestFocus();
+                          },
+                        ),
+
+                      // AnimatedSwitcher(
+                      //   duration: const Duration(milliseconds: 0),
+                      //   transitionBuilder: (Widget child, Animation<double> animation){
+                      //     return SlideTransition(
+                      //       position: Tween<Offset>(
+                      //         begin: const Offset(0.0, 0.5),
+                      //         end: Offset.zero,
+                      //       ).animate(animation),
+                      //       child: FadeTransition(
+                      //           opacity: animation,
+                      //           child: child
+                      //       ),
+                      //     );
+                      //   },
+                      //   child: _showCalendar ? CalendarSelector(key: const ValueKey("calendar"),
+                      //     onDateSelected: (selectedDate) {
+                      //       print("Đã chọn ngày từ Lịch: $selectedDate");
+                      //       setState(() { _showCalendar = false; });
+                      //       addNewTaskFocusNode.requestFocus();
+                      //     },) : SizedBox.shrink(),
+                      // )
+                    ],
+                  ),
+              ));
             },
           );
         },
@@ -499,7 +539,11 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(width: 6),
             Text(
               label,
-              style: TextStyle(fontSize: 15, color: FlathColors.textSecondary, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 15,
+                color: FlathColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
