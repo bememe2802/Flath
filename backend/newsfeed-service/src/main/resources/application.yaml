@@ -1,0 +1,15 @@
+server:
+  port: 8087
+  servlet:
+    context-path: /newsfeed
+
+spring:
+  application:
+    name: newsfeed-service
+
+app:
+  services:
+    post:
+      url: http://localhost:8083/post
+    profile:
+      url: http://localhost:8081/profile
