@@ -45,6 +45,6 @@ This sentence doesn’t really relate to today’s topic.
 Yesterday, we used Jira for task management and planned for the next two days.
 Today, our task was simply to set up the project. We decided to use Next.js for the frontend, but we haven’t yet decided what to use for the backend.
 
-The reason why we chose Next.js is quite simple — we wanted to learn a new framework. We’ve already used React before, so we wanted to explore and learn Next.js this time. In addition, ChatGPT recommended this framework to us, so we had even more reason to choose it.
+The reason why we chose Next.js is quite simple - we wanted to learn a new framework. We’ve already used React before, so we wanted to explore and learn Next.js this time. In addition, ChatGPT recommended this framework to us, so we had even more reason to choose it.
 
 Tomorrow, we’ll start coding the first UI page. Let’s see if we can finish it within the deadline!
