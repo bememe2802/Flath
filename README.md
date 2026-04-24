@@ -12,7 +12,7 @@ Duc & Khai's Journey to Create a Fantastic, Wonderful, Significant, Magnificent,
 
 One day, Khai saw a self-help video on TikTok about how to improve programming skills and sent it to Duc.  
 "Can we do a project to help people?" – Khai asked. 🧐
-"JUST DO ITTTT!" – Duc agreed 😃.  
+"JUST DO ITTTT!" – Duc agreed =))😃.  
 
 The idea was forgotten for a week, but on Oct 5, 2025, at KimWon Teahouse, 26 Bac Ai Street, Binh Tho Ward, District 9, Ho Chi Minh City, Vietnam, we remembered it and decided to start this project. We began with just a small idea, "small" skills, and "small" knowledge. But we believe that **over time this will grow bigger**, and so will our skills and knowledge.  
 
@@ -22,7 +22,7 @@ We are both students at PTIT-HCM. We feel that many students suffer from stress 
 
 *“Sometimes the flow slows down - only to gather strength.”* - Anonymous. 
 
-After the first spark of excitement, we realized that even a flowing river needs a clear direction before it can reach the sea. So today, we decided to slow down for a while - not to stop, but to understand 🌊. 
+After the first spark of excitement, we realized that even a flowing river needs a clear direction before it can reach the sea. So today, we decided to slow down for a while - not to stop, but to understand. 
 
 We took a step back to learn, reflect, and plan.
 
