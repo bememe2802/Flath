@@ -1,0 +1,14 @@
+{
+    "theme": "default",
+    "themeVariables": {
+        "primaryColor": "#f0f8ff",
+        "primaryBorderColor": "#1e90ff",
+        "secondaryColor": "#fff5f5",
+        "secondaryBorderColor": "#ff6b6b",
+        "tertiaryColor": "#f0fff0",
+        "tertiaryBorderColor": "#32cd32",
+        "lineColor": "#333333",
+        "fontSize": "14px",
+        "fontFamily": "monospace"
+    }
+}

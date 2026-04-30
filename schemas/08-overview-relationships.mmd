@@ -1,0 +1,41 @@
+graph TB
+    subgraph "MySQL"
+        Identity[identity-service<br/>User, Role, Permission]
+    end
+
+    subgraph "Neo4j"
+        Profile[profile-service<br/>UserProfile]
+    end
+
+    subgraph "MongoDB"
+        Post[post-service<br/>Post, PostComment]
+        Chat[chat-service<br/>Conversation, ChatMessage]
+        Notif[notification-service<br/>InAppNotification]
+        File[file-service<br/>FileMgmt]
+    end
+
+    subgraph "Redis"
+        Newsfeed[newsfeed-service<br/>newsfeed-cache]
+    end
+
+    subgraph "MySQL"
+        Study[study-service<br/>StudySession]
+    end
+
+    Identity -->|"userId"| Profile
+    Identity -->|"userId"| Post
+    Identity -->|"userId"| Chat
+    Identity -->|"userId"| Notif
+    Identity -->|"userId"| File
+    Identity -->|"userId"| Study
+    Post -->|"postId"| Notif
+    Post -->|"events"| Newsfeed
+
+    style Identity fill:#e1f5fe,stroke:#01579b
+    style Profile fill:#f3e5f5,stroke:#7b1fa2
+    style Post fill:#fff3e0,stroke:#e65100
+    style Chat fill:#e8f5e9,stroke:#1b5e20
+    style Notif fill:#fce4ec,stroke:#c62828
+    style File fill:#fff8e1,stroke:#f9a825
+    style Newsfeed fill:#fbe9e7,stroke:#bf360c
+    style Study fill:#e0f2f1,stroke:#004d40

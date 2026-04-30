@@ -30,22 +30,30 @@ import lombok.extern.slf4j.Slf4j;
 public class UserProfileService {
     UserProfileRepository userProfileRepository;
     FileClient fileClient;
-
     UserProfileMapper userProfileMapper;
+    ProfileCacheService profileCacheService;
 
     public UserProfileResponse createProfile(ProfileCreationRequest request) {
         UserProfile userProfile = userProfileMapper.toUserProfile(request);
         userProfile = userProfileRepository.save(userProfile);
-
-        return userProfileMapper.toUserProfileResponse(userProfile);
+        UserProfileResponse response = userProfileMapper.toUserProfileResponse(userProfile);
+        profileCacheService.put(response);
+        return response;
     }
 
     public UserProfileResponse getByUserId(String userId) {
+        var cachedProfile = profileCacheService.getByUserId(userId);
+        if (cachedProfile.isPresent()) {
+            return cachedProfile.get();
+        }
+
         UserProfile userProfile = userProfileRepository
                 .findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        return userProfileMapper.toUserProfileResponse(userProfile);
+        UserProfileResponse response = userProfileMapper.toUserProfileResponse(userProfile);
+        profileCacheService.put(response);
+        return response;
     }
 
     public UserProfileResponse getProfile(String id) {
@@ -62,15 +70,16 @@ public class UserProfileService {
         return profiles.stream().map(userProfileMapper::toUserProfileResponse).toList();
     }
 
+    public List<UserProfileResponse> getAllProfilesInternal() {
+        return userProfileRepository.findAll().stream()
+                .map(userProfileMapper::toUserProfileResponse)
+                .toList();
+    }
+
     public UserProfileResponse getMyProfile() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = authentication.getName();
-
-        var profile = userProfileRepository
-                .findByUserId(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
-        return userProfileMapper.toUserProfileResponse(profile);
+        return getByUserId(userId);
     }
 
     public UserProfileResponse updateMyProfile(UpdateProfileRequest request) {
@@ -82,8 +91,9 @@ public class UserProfileService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         userProfileMapper.update(profile, request);
-
-        return userProfileMapper.toUserProfileResponse(userProfileRepository.save(profile));
+        UserProfileResponse response = userProfileMapper.toUserProfileResponse(userProfileRepository.save(profile));
+        profileCacheService.put(response);
+        return response;
     }
 
     public UserProfileResponse updateAvatar(MultipartFile file) {
@@ -97,8 +107,10 @@ public class UserProfileService {
         var response = fileClient.uploadMedia(file);
 
         profile.setAvatar(response.getResult().getUrl());
-
-        return userProfileMapper.toUserProfileResponse(userProfileRepository.save(profile));
+        UserProfileResponse profileResponse =
+                userProfileMapper.toUserProfileResponse(userProfileRepository.save(profile));
+        profileCacheService.put(profileResponse);
+        return profileResponse;
     }
 
     public List<UserProfileResponse> search(SearchUserRequest request) {

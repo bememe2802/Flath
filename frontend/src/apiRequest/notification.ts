@@ -1,12 +1,16 @@
 import http from '@/src/lib/http'
-import type { ApiEnvelope, EmailReceipt } from '@/src/types/domain'
+import type { ApiEnvelope, EmailReceipt, NotificationFeed } from '@/src/types/domain'
 
 const notificationApiRequest = {
   sendStudyRecap: (body: {
     to: { name: string; email: string }
     subject: string
     htmlContent: string
-  }) => http.post<ApiEnvelope<EmailReceipt>>('/notification/email/send', body)
+  }) => http.post<ApiEnvelope<EmailReceipt>>('/notification/email/send', body),
+  myNotifications: () =>
+    http.get<ApiEnvelope<NotificationFeed>>('/notification/my-notifications'),
+  markAllAsRead: () =>
+    http.post<ApiEnvelope<null>>('/notification/my-notifications/read-all', {})
 }
 
 export default notificationApiRequest

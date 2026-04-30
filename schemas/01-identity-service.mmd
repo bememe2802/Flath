@@ -1,0 +1,38 @@
+erDiagram
+    User ||--o{ UserRole : has
+    UserRole }o--|| Role : belongs
+    Role ||--o{ RolePermission : has
+    RolePermission }o--|| Permission : belongs
+
+    User {
+        string id PK "UUID"
+        string username "unique"
+        string password
+        string email "unique"
+        boolean emailVerified
+    }
+
+    UserRole {
+        string userId PK
+        string roleName PK
+    }
+
+    Role {
+        string name PK
+        string description
+    }
+
+    RolePermission {
+        string roleName PK
+        string permissionName PK
+    }
+
+    Permission {
+        string name PK
+        string description
+    }
+
+    InvalidatedToken {
+        string id PK
+        date expiryTime
+    }

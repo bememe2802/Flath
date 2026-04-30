@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -19,12 +18,10 @@ import com.flath.study.dto.response.StudyLeaderboardEntryResponse;
 import com.flath.study.dto.response.StudyStatsResponse;
 import com.flath.study.dto.response.UserProfileResponse;
 import com.flath.study.entity.StudySession;
-import com.flath.study.repository.StudySessionRepository;
 import com.flath.study.repository.httpclient.ProfileClient;
 
 import feign.FeignException;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
@@ -32,9 +29,9 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class StudyAnalyticsService {
-    StudySessionRepository studySessionRepository;
     StudySessionService studySessionService;
     ProfileClient profileClient;
+    StudyLeaderboardCacheService studyLeaderboardCacheService;
 
     public StudyStatsResponse getMyStats() {
         return buildStats(studySessionService.getCurrentUserSessions());
@@ -50,45 +47,32 @@ public class StudyAnalyticsService {
 
     private List<StudyLeaderboardEntryResponse> buildLeaderboard(int limit, boolean weeklyOnly) {
         int safeLimit = Math.max(1, Math.min(limit, 100));
-        Map<String, List<StudySession>> sessionsByUser = new HashMap<>();
+        List<String> rankedUserIds = weeklyOnly
+                ? studyLeaderboardCacheService.getTopWeeklyUserIds(safeLimit)
+                : studyLeaderboardCacheService.getTopGlobalUserIds(safeLimit);
 
-        for (StudySession session : studySessionRepository.findAll()) {
-            sessionsByUser
-                    .computeIfAbsent(session.getUserId(), ignored -> new java.util.ArrayList<>())
-                    .add(session);
-        }
-
-        Comparator<StudyLeaderboardEntryResponse> comparator = weeklyOnly
-                ? Comparator.comparingLong(StudyLeaderboardEntryResponse::getWeekSeconds)
-                        .thenComparingLong(StudyLeaderboardEntryResponse::getTotalSeconds)
-                        .thenComparingInt(StudyLeaderboardEntryResponse::getStreakDays)
-                        .reversed()
-                : Comparator.comparingLong(StudyLeaderboardEntryResponse::getTotalSeconds)
-                        .thenComparingLong(StudyLeaderboardEntryResponse::getWeekSeconds)
-                        .thenComparingInt(StudyLeaderboardEntryResponse::getStreakDays)
-                        .reversed();
-
-        return sessionsByUser.entrySet().stream()
-                .map(entry -> {
-                    StudyStatsResponse stats = buildStats(entry.getValue());
-                    UserProfileResponse profile = getProfile(entry.getKey());
-
-                    return StudyLeaderboardEntryResponse.builder()
-                            .userId(entry.getKey())
-                            .username(profile.getUsername())
-                            .firstName(profile.getFirstName())
-                            .lastName(profile.getLastName())
-                            .avatar(profile.getAvatar())
-                            .city(profile.getCity())
-                            .totalSeconds(stats.getTotalSeconds())
-                            .weekSeconds(stats.getWeekSeconds())
-                            .streakDays(stats.getStreakDays())
-                            .build();
-                })
+        return rankedUserIds.stream()
+                .map(this::buildLeaderboardEntry)
                 .filter(entry -> weeklyOnly ? entry.getWeekSeconds() > 0 : entry.getTotalSeconds() > 0)
-                .sorted(comparator)
                 .limit(safeLimit)
                 .toList();
+    }
+
+    private StudyLeaderboardEntryResponse buildLeaderboardEntry(String userId) {
+        StudyStatsResponse stats = buildStats(studySessionService.getSessionsForUser(userId));
+        UserProfileResponse profile = getProfile(userId);
+
+        return StudyLeaderboardEntryResponse.builder()
+                .userId(userId)
+                .username(profile.getUsername())
+                .firstName(profile.getFirstName())
+                .lastName(profile.getLastName())
+                .avatar(profile.getAvatar())
+                .city(profile.getCity())
+                .totalSeconds(studyLeaderboardCacheService.getGlobalScore(userId))
+                .weekSeconds(studyLeaderboardCacheService.getWeeklyScore(userId))
+                .streakDays(stats.getStreakDays())
+                .build();
     }
 
     private UserProfileResponse getProfile(String userId) {
@@ -175,14 +159,4 @@ public class StudyAnalyticsService {
                 .chart(chart)
                 .build();
     }
-
-    @Builder
-    private record StudyAggregate(
-            long totalSeconds,
-            long todaySeconds,
-            long weekSeconds,
-            long monthSeconds,
-            long yearSeconds,
-            int streakDays,
-            List<StudyChartPointResponse> chart) {}
 }

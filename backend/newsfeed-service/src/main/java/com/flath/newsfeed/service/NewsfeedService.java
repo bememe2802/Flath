@@ -3,6 +3,7 @@ package com.flath.newsfeed.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.flath.newsfeed.dto.PageResponse;
@@ -23,10 +24,18 @@ import lombok.experimental.FieldDefaults;
 public class NewsfeedService {
     PostClient postClient;
     ProfileClient profileClient;
+    NewsfeedCacheService newsfeedCacheService;
 
     public PageResponse<NewsfeedItemResponse> getFeed(int page, int size) {
         int safePage = Math.max(page, 1);
         int safeSize = Math.min(Math.max(size, 1), 50);
+        String viewerUserId =
+                SecurityContextHolder.getContext().getAuthentication().getName();
+
+        var cachedFeed = newsfeedCacheService.getFeed(viewerUserId, safePage, safeSize);
+        if (cachedFeed.isPresent()) {
+            return cachedFeed.get();
+        }
 
         var response = postClient.getFeed(safePage, safeSize).getResult();
         Map<String, UserProfileResponse> profiles = new HashMap<>();
@@ -35,13 +44,15 @@ public class NewsfeedService {
                 .map(post -> toNewsfeedItem(post, profiles))
                 .toList();
 
-        return PageResponse.<NewsfeedItemResponse>builder()
+        PageResponse<NewsfeedItemResponse> feed = PageResponse.<NewsfeedItemResponse>builder()
                 .currentPage(response.getCurrentPage())
                 .pageSize(response.getPageSize())
                 .totalPages(response.getTotalPages())
                 .totalElements(response.getTotalElements())
                 .data(items)
                 .build();
+        newsfeedCacheService.putFeed(viewerUserId, safePage, safeSize, feed);
+        return feed;
     }
 
     private NewsfeedItemResponse toNewsfeedItem(PostResponse post, Map<String, UserProfileResponse> profiles) {

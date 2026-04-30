@@ -39,11 +39,15 @@ export type PostComment = {
   id: string
   postId: string
   userId: string
+  parentCommentId?: string | null
   username: string
   firstName?: string | null
   lastName?: string | null
   avatar?: string | null
   content: string
+  likeCount: number
+  likedByMe: boolean
+  replies: PostComment[]
   created: string
   createdDate?: string
 }
@@ -104,6 +108,26 @@ export type EmailReceipt = {
   messageId: string
 }
 
+export type InAppNotification = {
+  id: string
+  actorUserId: string
+  actorUsername?: string | null
+  actorFirstName?: string | null
+  actorLastName?: string | null
+  actorAvatar?: string | null
+  type: string
+  title: string
+  message: string
+  postId?: string | null
+  read: boolean
+  createdDate?: string
+}
+
+export type NotificationFeed = {
+  data: InAppNotification[]
+  unreadCount: number
+}
+
 export type StudySession = {
   id: string
   userId: string
@@ -140,4 +164,21 @@ export type StudyLeaderboardEntry = {
   totalSeconds: number
   weekSeconds: number
   streakDays: number
+}
+
+export type HomeBffResponse = {
+  profile: UserProfile | null
+  feed: PageResponse<Post>
+  studyStats: StudyStats
+}
+
+export type MeBffResponse = {
+  profile: UserProfile | null
+  posts: PageResponse<Post>
+  studyStats: StudyStats
+}
+
+export type LeagueBffResponse = {
+  profile: UserProfile | null
+  entries: StudyLeaderboardEntry[]
 }

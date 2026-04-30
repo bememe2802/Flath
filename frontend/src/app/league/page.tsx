@@ -1,13 +1,9 @@
-'use client'
+import { Medal, Sparkles, Trophy } from 'lucide-react'
 
-import { LoaderCircle, Medal, Sparkles, Trophy } from 'lucide-react'
-import { useEffect, useState } from 'react'
-
-import studyApiRequest from '@/src/apiRequest/study'
 import UserAvatar from '@/src/components/UserAvatar'
 import { getProfileName } from '@/src/lib/presentation'
 import { formatDuration } from '@/src/lib/study'
-import type { StudyLeaderboardEntry } from '@/src/types/domain'
+import { getLeagueBff } from '@/src/server/bff'
 
 const tierLabels = [
   { name: 'Bronze', minHours: 0, tone: 'bg-orange-50 text-orange-700' },
@@ -21,26 +17,10 @@ function getTier(weekSeconds: number) {
   return [...tierLabels].reverse().find((tier) => weekHours >= tier.minHours) ?? tierLabels[0]
 }
 
-export default function LeaguePage() {
-  const [entries, setEntries] = useState<StudyLeaderboardEntry[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    async function bootstrap() {
-      setIsLoading(true)
-
-      try {
-        const response = await studyApiRequest.weeklyLeaderboard(12)
-        setEntries(response.payload.result)
-      } catch {
-        setEntries([])
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    void bootstrap()
-  }, [])
+export default async function LeaguePage() {
+  const leagueData = await getLeagueBff()
+  const entries = leagueData.entries
+  const currentUserId = leagueData.profile?.userId
 
   const podium = entries.slice(0, 3)
 
@@ -67,22 +47,20 @@ export default function LeaguePage() {
           </div>
         </section>
 
-        {isLoading ? (
-          <section className="panel-card flex min-h-80 items-center justify-center">
-            <LoaderCircle className="size-6 animate-spin text-slate-400" />
-          </section>
-        ) : entries.length > 0 ? (
+        {entries.length > 0 ? (
           <>
             <section className="grid gap-6 lg:grid-cols-3">
               {podium.map((entry, index) => {
                 const name = getProfileName(entry)
+                const isCurrentUser = entry.userId === currentUserId
 
                 return (
                   <article
                     key={entry.userId}
                     className={[
                       'panel-card p-6',
-                      index === 0 ? 'lg:-translate-y-3' : ''
+                      index === 0 ? 'lg:-translate-y-3' : '',
+                      isCurrentUser ? 'ring-2 ring-amber-200' : ''
                     ].join(' ')}
                   >
                     <div className="flex items-center justify-between">
@@ -108,7 +86,10 @@ export default function LeaguePage() {
                       />
                       <div>
                         <h2 className="text-xl font-semibold text-slate-900">{name}</h2>
-                        <p className="text-sm text-slate-500">@{entry.username}</p>
+                        <p className="text-sm text-slate-500">
+                          @{entry.username}
+                          {isCurrentUser ? ' (you)' : ''}
+                        </p>
                       </div>
                     </div>
 

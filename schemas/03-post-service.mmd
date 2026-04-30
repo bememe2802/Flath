@@ -1,0 +1,22 @@
+erDiagram
+    Post {
+        string id PK "ObjectId"
+        string userId
+        string content
+        string sharedPostId "nullable"
+        string likedUserIds "Set<string>"
+        string comments "List<PostComment>"
+        int shareCount
+        date createdDate
+        date modifiedDate
+    }
+
+    PostComment {
+        string id
+        string userId
+        string content
+        string parentCommentId "nullable"
+        string likedUserIds "Set<string>"
+        string replies "List<PostComment>"
+        date createdDate
+    }

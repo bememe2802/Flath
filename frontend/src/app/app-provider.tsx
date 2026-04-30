@@ -33,12 +33,14 @@ export function useAppContext() {
 }
 
 export default function AppProvider({
+  initialProfile = null,
   children
 }: {
+  initialProfile?: UserProfile | null
   children: React.ReactNode
 }) {
-  const [profile, setProfileState] = useState<UserProfile | null>(null)
-  const [isReady, setIsReady] = useState(false)
+  const [profile, setProfileState] = useState<UserProfile | null>(initialProfile)
+  const [isReady, setIsReady] = useState(Boolean(initialProfile))
 
   const setProfile = (nextProfile: UserProfile | null) => {
     setProfileState(nextProfile)
@@ -60,6 +62,7 @@ export default function AppProvider({
       setProfile(payload.result)
       return payload.result
     } catch {
+      setProfile(null)
       return null
     }
   }
@@ -69,6 +72,13 @@ export default function AppProvider({
   }
 
   useEffect(() => {
+    if (initialProfile) {
+      writeStoredProfile(initialProfile)
+      setProfileState(initialProfile)
+      setIsReady(true)
+      return
+    }
+
     const cachedProfile = readStoredProfile<UserProfile>()
     if (cachedProfile) {
       setProfileState(cachedProfile)
@@ -82,7 +92,7 @@ export default function AppProvider({
     }
 
     refreshProfile().finally(() => setIsReady(true))
-  }, [])
+  }, [initialProfile])
 
   return (
     <AppContext.Provider

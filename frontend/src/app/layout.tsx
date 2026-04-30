@@ -5,6 +5,7 @@ import "./globals.css";
 import AppProvider from "@/src/app/app-provider";
 import NavigationBar from "@/src/components/NavigationBar";
 import { ThemeProvider } from "@/src/components/theme-provider";
+import { serverApiRequest } from "@/src/lib/server-api";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,11 +22,16 @@ export const metadata: Metadata = {
   description: "Flow where the paths goes",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialProfile = await serverApiRequest
+    .myProfile({ requireAuth: false, redirectOnUnauthorized: false })
+    .then((response) => response.result)
+    .catch(() => null);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -37,7 +43,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AppProvider>
+          <AppProvider initialProfile={initialProfile}>
             <NavigationBar />
             {children}
           </AppProvider>

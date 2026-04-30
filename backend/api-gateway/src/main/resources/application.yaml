@@ -43,8 +43,7 @@ spring:
         - id: chat_websocket_service
           uri: ws://localhost:8085
           predicates:
-            - Path=${app.api-prefix}/chat/ws
-            - Path=${app.api-prefix}/chat/ws/**
+            - Path=${app.api-prefix}/chat/ws,${app.api-prefix}/chat/ws/**
           filters:
             - StripPrefix=2
         - id: chat_service

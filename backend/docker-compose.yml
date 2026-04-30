@@ -1,4 +1,4 @@
-name: backend
+name: flath
 services:
   kafka:
     image: apache/kafka:3.7.0
@@ -46,6 +46,17 @@ services:
       - '7687:7687'
     environment:
       - NEO4J_AUTH=neo4j/123456789
+  redis:
+    image: redis:7.4-alpine
+    container_name: redis
+    hostname: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
 volumes:
   kafka_data:
+    driver: local
+  redis_data:
     driver: local

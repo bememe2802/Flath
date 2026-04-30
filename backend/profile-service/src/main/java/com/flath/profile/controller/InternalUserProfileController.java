@@ -1,5 +1,7 @@
 package com.flath.profile.controller;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,6 +34,13 @@ public class InternalUserProfileController {
     ApiResponse<UserProfileResponse> getProfile(@PathVariable String userId) {
         return ApiResponse.<UserProfileResponse>builder()
                 .result(userProfileService.getByUserId(userId))
+                .build();
+    }
+
+    @GetMapping("/internal/users")
+    ApiResponse<List<UserProfileResponse>> getAllProfiles() {
+        return ApiResponse.<List<UserProfileResponse>>builder()
+                .result(userProfileService.getAllProfilesInternal())
                 .build();
     }
 }

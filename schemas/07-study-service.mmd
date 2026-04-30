@@ -1,0 +1,10 @@
+erDiagram
+    StudySession {
+        string id PK
+        string userId "indexed"
+        date startedAt "indexed"
+        date endedAt
+        long durationSeconds
+        string focusLabel "nullable"
+        date createdDate "auto"
+    }

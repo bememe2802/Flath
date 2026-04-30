@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import authApiRequest from '@/src/apiRequest/auth'
 import { useAppContext } from '@/src/app/app-provider'
 import ChatDock from '@/src/components/ChatDock'
+import NotificationBell from '@/src/components/NotificationBell'
 import { ModeToggle } from '@/src/components/ui/mode-toggle'
 import { getInitials, getProfileName } from '@/src/lib/presentation'
 
@@ -79,6 +80,7 @@ export default function NavigationBar() {
       </div>
 
       <div className="ml-4 flex items-center gap-3">
+        {profile ? <NotificationBell /> : null}
         {profile ? <ChatDock /> : null}
         <ModeToggle />
         <Link href="/me" className="flex items-center gap-2 text-sm text-gray-700">

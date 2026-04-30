@@ -23,6 +23,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class StudySessionService {
     StudySessionRepository studySessionRepository;
+    StudyLeaderboardCacheService studyLeaderboardCacheService;
 
     public StudySessionResponse create(StudySessionCreationRequest request) {
         long durationSeconds =
@@ -41,7 +42,9 @@ public class StudySessionService {
                 .focusLabel(normalizeFocusLabel(request.getFocusLabel()))
                 .build();
 
-        return toResponse(studySessionRepository.save(studySession));
+        StudySession savedSession = studySessionRepository.save(studySession);
+        studyLeaderboardCacheService.recordSession(savedSession);
+        return toResponse(savedSession);
     }
 
     public List<StudySessionResponse> getMySessions(int limit) {
@@ -55,6 +58,10 @@ public class StudySessionService {
 
     List<StudySession> getCurrentUserSessions() {
         return studySessionRepository.findAllByUserIdOrderByStartedAtDesc(getCurrentUserId());
+    }
+
+    List<StudySession> getSessionsForUser(String userId) {
+        return studySessionRepository.findAllByUserIdOrderByStartedAtDesc(userId);
     }
 
     private StudySessionResponse toResponse(StudySession studySession) {

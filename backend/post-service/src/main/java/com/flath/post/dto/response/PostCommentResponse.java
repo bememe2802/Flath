@@ -1,6 +1,7 @@
 package com.flath.post.dto.response;
 
 import java.time.Instant;
+import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -18,11 +19,15 @@ public class PostCommentResponse {
     String id;
     String postId;
     String userId;
+    String parentCommentId;
     String username;
     String firstName;
     String lastName;
     String avatar;
     String content;
+    int likeCount;
+    boolean likedByMe;
+    List<PostCommentResponse> replies;
     String created;
     Instant createdDate;
 }

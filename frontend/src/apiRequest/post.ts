@@ -20,6 +20,16 @@ const postApiRequest = {
     http.get<ApiEnvelope<PostComment[]>>(`/post/${postId}/comments`),
   comment: (postId: string, body: { content: string }) =>
     http.post<ApiEnvelope<PostComment>>(`/post/${postId}/comments`, body),
+  toggleCommentLike: (postId: string, commentId: string) =>
+    http.post<ApiEnvelope<PostReaction>>(
+      `/post/${postId}/comments/${commentId}/likes/toggle`,
+      {}
+    ),
+  replyComment: (postId: string, commentId: string, body: { content: string }) =>
+    http.post<ApiEnvelope<PostComment>>(
+      `/post/${postId}/comments/${commentId}/replies`,
+      body
+    ),
   share: (postId: string, body?: { content?: string }) =>
     http.post<ApiEnvelope<Post>>(`/post/${postId}/share`, body ?? {})
 }

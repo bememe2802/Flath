@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.flath.event.dto.PostPublishedEvent;
 import com.flath.post.dto.PageResponse;
 import com.flath.post.dto.request.CommentRequest;
 import com.flath.post.dto.request.PostRequest;
@@ -32,6 +34,7 @@ import com.flath.post.exception.AppException;
 import com.flath.post.exception.ErrorCode;
 import com.flath.post.mapper.PostMapper;
 import com.flath.post.repository.PostRepository;
+import com.flath.post.repository.httpclient.NotificationClient;
 import com.flath.post.repository.httpclient.ProfileClient;
 
 import lombok.AccessLevel;
@@ -48,6 +51,8 @@ public class PostService {
     PostRepository postRepository;
     PostMapper postMapper;
     ProfileClient profileClient;
+    NotificationClient notificationClient;
+    KafkaTemplate<String, Object> kafkaTemplate;
 
     public PostResponse createPost(PostRequest request) {
         String userId = getCurrentUserId();
@@ -62,7 +67,9 @@ public class PostService {
                 .build();
 
         post = postRepository.save(post);
-        return mapPosts(List.of(post), userId).getFirst();
+        PostResponse postResponse = mapPosts(List.of(post), userId).getFirst();
+        publishPostNotification(post, postResponse);
+        return postResponse;
     }
 
     public PageResponse<PostResponse> getMyPosts(int page, int size) {
@@ -133,6 +140,7 @@ public class PostService {
                 .id(UUID.randomUUID().toString())
                 .userId(userId)
                 .content(content)
+                .parentCommentId(null)
                 .createdDate(Instant.now())
                 .build();
 
@@ -147,6 +155,69 @@ public class PostService {
         postRepository.save(post);
 
         return mapComment(post.getId(), comment, new HashMap<>());
+    }
+
+    public PostReactionResponse toggleCommentLike(String postId, String commentId) {
+        String userId = getCurrentUserId();
+        Post post = getPost(postId);
+        PostComment comment = findComment(post.getComments(), commentId);
+
+        if (comment == null) {
+            throw new AppException(ErrorCode.COMMENT_INVALID);
+        }
+
+        Set<String> likedUserIds = comment.getLikedUserIds();
+        if (likedUserIds == null) {
+            likedUserIds = new HashSet<>();
+            comment.setLikedUserIds(likedUserIds);
+        }
+
+        boolean liked;
+        if (likedUserIds.contains(userId)) {
+            likedUserIds.remove(userId);
+            liked = false;
+        } else {
+            likedUserIds.add(userId);
+            liked = true;
+        }
+
+        post.setModifiedDate(Instant.now());
+        postRepository.save(post);
+
+        return PostReactionResponse.builder()
+                .liked(liked)
+                .likeCount(likedUserIds.size())
+                .build();
+    }
+
+    public PostCommentResponse replyToComment(String postId, String commentId, CommentRequest request) {
+        String userId = getCurrentUserId();
+        Post post = getPost(postId);
+        PostComment parentComment = findComment(post.getComments(), commentId);
+        String content = trimToNull(request.getContent());
+
+        if (parentComment == null || content == null) {
+            throw new AppException(ErrorCode.COMMENT_INVALID);
+        }
+
+        PostComment reply = PostComment.builder()
+                .id(UUID.randomUUID().toString())
+                .userId(userId)
+                .content(content)
+                .parentCommentId(commentId)
+                .createdDate(Instant.now())
+                .build();
+
+        List<PostComment> replies = parentComment.getReplies();
+        if (replies == null) {
+            replies = new ArrayList<>();
+            parentComment.setReplies(replies);
+        }
+
+        replies.add(reply);
+        post.setModifiedDate(Instant.now());
+        postRepository.save(post);
+        return mapComment(post.getId(), reply, new HashMap<>());
     }
 
     public PostResponse sharePost(String postId, SharePostRequest request) {
@@ -223,7 +294,7 @@ public class PostService {
         postResponse.setUsername(profile != null ? profile.getUsername() : null);
         postResponse.setCreated(dateTimeFormatter.format(post.getCreatedDate()));
         postResponse.setLikeCount(likedUserIds.size());
-        postResponse.setCommentCount(comments.size());
+        postResponse.setCommentCount(countComments(comments));
         postResponse.setShareCount(post.getShareCount());
         postResponse.setLikedByMe(viewerUserId != null && likedUserIds.contains(viewerUserId));
         postResponse.setSharedPostId(post.getSharedPostId());
@@ -240,19 +311,61 @@ public class PostService {
 
     private PostCommentResponse mapComment(String postId, PostComment comment, Map<String, UserProfileResponse> profiles) {
         UserProfileResponse profile = getUserProfile(comment.getUserId(), profiles);
+        String viewerUserId = getCurrentUserIdOrNull();
+        Set<String> likedUserIds = comment.getLikedUserIds() != null ? comment.getLikedUserIds() : Set.of();
+        List<PostCommentResponse> replies = (comment.getReplies() != null ? comment.getReplies() : List.<PostComment>of())
+                .stream()
+                .sorted((left, right) -> left.getCreatedDate().compareTo(right.getCreatedDate()))
+                .map(reply -> mapComment(postId, reply, profiles))
+                .toList();
 
         return PostCommentResponse.builder()
                 .id(comment.getId())
                 .postId(postId)
                 .userId(comment.getUserId())
+                .parentCommentId(comment.getParentCommentId())
                 .username(profile != null ? profile.getUsername() : null)
                 .firstName(profile != null ? profile.getFirstName() : null)
                 .lastName(profile != null ? profile.getLastName() : null)
                 .avatar(profile != null ? profile.getAvatar() : null)
                 .content(comment.getContent())
+                .likeCount(likedUserIds.size())
+                .likedByMe(viewerUserId != null && likedUserIds.contains(viewerUserId))
+                .replies(replies)
                 .created(dateTimeFormatter.format(comment.getCreatedDate()))
                 .createdDate(comment.getCreatedDate())
                 .build();
+    }
+
+    private PostComment findComment(List<PostComment> comments, String commentId) {
+        if (comments == null || comments.isEmpty()) {
+            return null;
+        }
+
+        for (PostComment comment : comments) {
+            if (commentId.equals(comment.getId())) {
+                return comment;
+            }
+
+            PostComment replyMatch = findComment(comment.getReplies(), commentId);
+            if (replyMatch != null) {
+                return replyMatch;
+            }
+        }
+
+        return null;
+    }
+
+    private int countComments(List<PostComment> comments) {
+        if (comments == null || comments.isEmpty()) {
+            return 0;
+        }
+
+        int total = 0;
+        for (PostComment comment : comments) {
+            total += 1 + countComments(comment.getReplies());
+        }
+        return total;
     }
 
     private Post getPost(String postId) {
@@ -301,5 +414,51 @@ public class PostService {
 
         String normalized = value.trim();
         return normalized.isEmpty() ? null : normalized;
+    }
+
+    private void publishPostNotification(Post post, PostResponse postResponse) {
+        try {
+            UserProfileResponse authorProfile = fetchUserProfile(post.getUserId());
+            List<String> recipientUserIds = profileClient.getAllProfiles().getResult().stream()
+                    .map(UserProfileResponse::getUserId)
+                    .filter(Objects::nonNull)
+                    .filter(recipientUserId -> !recipientUserId.equals(post.getUserId()))
+                    .distinct()
+                    .toList();
+
+            if (recipientUserIds.isEmpty()) {
+                return;
+            }
+
+            PostPublishedEvent event = PostPublishedEvent.builder()
+                    .postId(post.getId())
+                    .authorUserId(post.getUserId())
+                    .authorUsername(authorProfile != null ? authorProfile.getUsername() : postResponse.getUsername())
+                    .authorFirstName(authorProfile != null ? authorProfile.getFirstName() : null)
+                    .authorLastName(authorProfile != null ? authorProfile.getLastName() : null)
+                    .authorAvatar(authorProfile != null ? authorProfile.getAvatar() : null)
+                    .contentPreview(buildContentPreview(post.getContent()))
+                    .createdDate(post.getCreatedDate())
+                    .recipientUserIds(recipientUserIds)
+                    .build();
+
+            kafkaTemplate.send("in-app-notification", event);
+            notificationClient.createPostPublishedNotifications(event);
+        } catch (Exception exception) {
+            log.error("Unable to publish post notification event", exception);
+        }
+    }
+
+    private String buildContentPreview(String content) {
+        String normalized = trimToNull(content);
+        if (normalized == null) {
+            return "shared a new post.";
+        }
+
+        if (normalized.length() <= 120) {
+            return normalized;
+        }
+
+        return normalized.substring(0, 117) + "...";
     }
 }

@@ -50,6 +50,68 @@ function normalizePost(post: Post): Post {
   }
 }
 
+function normalizeComment(comment: PostComment): PostComment {
+  return {
+    ...comment,
+    parentCommentId: comment.parentCommentId ?? null,
+    likeCount: comment.likeCount ?? 0,
+    likedByMe: comment.likedByMe ?? false,
+    replies: (comment.replies ?? []).map(normalizeComment)
+  }
+}
+
+function countComments(comments: PostComment[]): number {
+  return comments.reduce(
+    (total, comment) => total + 1 + countComments(comment.replies ?? []),
+    0
+  )
+}
+
+function updateCommentTree(
+  comments: PostComment[],
+  targetId: string,
+  updater: (comment: PostComment) => PostComment
+): PostComment[] {
+  return comments.map((comment) => {
+    if (comment.id === targetId) {
+      return updater(comment)
+    }
+
+    if (comment.replies.length === 0) {
+      return comment
+    }
+
+    return {
+      ...comment,
+      replies: updateCommentTree(comment.replies, targetId, updater)
+    }
+  })
+}
+
+function appendReplyToComment(
+  comments: PostComment[],
+  parentId: string,
+  reply: PostComment
+): PostComment[] {
+  return comments.map((comment) => {
+    if (comment.id === parentId) {
+      return {
+        ...comment,
+        replies: [...comment.replies, reply]
+      }
+    }
+
+    if (comment.replies.length === 0) {
+      return comment
+    }
+
+    return {
+      ...comment,
+      replies: appendReplyToComment(comment.replies, parentId, reply)
+    }
+  })
+}
+
 function PostBody({
   post,
   author,
@@ -130,27 +192,112 @@ function PostBody({
   )
 }
 
-function CommentItem({ comment }: { comment: PostComment }) {
+function CommentItem({
+  comment,
+  onToggleLike,
+  onReply,
+  activeCommentLikeId,
+  activeReplyCommentId
+}: {
+  comment: PostComment
+  onToggleLike: (commentId: string) => Promise<void>
+  onReply: (commentId: string, content: string) => Promise<void>
+  activeCommentLikeId: string | null
+  activeReplyCommentId: string | null
+}) {
   const profileName = getProfileName(comment)
+  const [isReplyOpen, setIsReplyOpen] = useState(false)
+  const [replyDraft, setReplyDraft] = useState('')
+  const isTogglingLike = activeCommentLikeId === comment.id
+  const isReplying = activeReplyCommentId === comment.id
 
   return (
-    <div className="flex gap-3">
-      <UserAvatar
-        src={comment.avatar}
-        name={profileName}
-        className="size-8"
-        fallbackClassName="bg-gray-900 text-white"
-      />
-      <div className="min-w-0 flex-1 rounded-xl bg-gray-50 px-4 py-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium text-gray-800">{profileName}</span>
-          <span className="text-xs text-gray-500">
-            {formatRelativeTime(comment.createdDate || comment.created)}
-          </span>
+    <div className="space-y-3">
+      <div className="flex gap-3">
+        <UserAvatar
+          src={comment.avatar}
+          name={profileName}
+          className="size-8"
+          fallbackClassName="bg-gray-900 text-white"
+        />
+        <div className="min-w-0 flex-1">
+          <div className="rounded-xl bg-gray-50 px-4 py-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-medium text-gray-800">{profileName}</span>
+              <span className="text-xs text-gray-500">
+                {formatRelativeTime(comment.createdDate || comment.created)}
+              </span>
+            </div>
+            <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-gray-700">
+              {comment.content}
+            </p>
+          </div>
+
+          <div className="mt-2 flex flex-wrap items-center gap-3 px-1 text-xs">
+            <button
+              type="button"
+              onClick={() => void onToggleLike(comment.id)}
+              disabled={isTogglingLike}
+              className={`font-medium transition ${
+                comment.likedByMe
+                  ? 'text-red-600'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {isTogglingLike ? 'Liking...' : 'Like'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsReplyOpen((current) => !current)}
+              className="font-medium text-gray-500 transition hover:text-gray-700"
+            >
+              Reply
+            </button>
+            <span className="text-gray-400">
+              {comment.likeCount} {comment.likeCount === 1 ? 'like' : 'likes'}
+            </span>
+          </div>
+
+          {isReplyOpen ? (
+            <div className="mt-3 flex gap-2">
+              <textarea
+                value={replyDraft}
+                onChange={(event) => setReplyDraft(event.target.value)}
+                placeholder="Write a reply..."
+                className="min-h-16 flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm leading-6 text-gray-700 outline-none transition focus:border-blue-500"
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  const content = replyDraft.trim()
+                  if (!content || isReplying) return
+                  await onReply(comment.id, content)
+                  setReplyDraft('')
+                  setIsReplyOpen(false)
+                }}
+                disabled={isReplying || !replyDraft.trim()}
+                className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-3 text-xs font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isReplying ? 'Sending...' : 'Reply'}
+              </button>
+            </div>
+          ) : null}
+
+          {comment.replies.length > 0 ? (
+            <div className="mt-3 space-y-3 border-l border-gray-200 pl-4">
+              {comment.replies.map((reply) => (
+                <CommentItem
+                  key={reply.id}
+                  comment={reply}
+                  onToggleLike={onToggleLike}
+                  onReply={onReply}
+                  activeCommentLikeId={activeCommentLikeId}
+                  activeReplyCommentId={activeReplyCommentId}
+                />
+              ))}
+            </div>
+          ) : null}
         </div>
-        <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-gray-700">
-          {comment.content}
-        </p>
       </div>
     </div>
   )
@@ -166,6 +313,8 @@ export default function PostCard({ post, author, onShared }: PostCardProps) {
   const [isTogglingLike, setIsTogglingLike] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
+  const [activeCommentLikeId, setActiveCommentLikeId] = useState<string | null>(null)
+  const [activeReplyCommentId, setActiveReplyCommentId] = useState<string | null>(null)
   const [commentError, setCommentError] = useState('')
   const [actionError, setActionError] = useState('')
 
@@ -179,7 +328,12 @@ export default function PostCard({ post, author, onShared }: PostCardProps) {
 
     try {
       const response = await postApiRequest.comments(postState.id)
-      setComments(response.payload.result)
+      const normalizedComments = response.payload.result.map(normalizeComment)
+      setComments(normalizedComments)
+      setPostState((current) => ({
+        ...current,
+        commentCount: countComments(normalizedComments)
+      }))
       setHasLoadedComments(true)
     } catch {
       setCommentError('Unable to load comments right now.')
@@ -226,7 +380,8 @@ export default function PostCard({ post, author, onShared }: PostCardProps) {
 
     try {
       const response = await postApiRequest.comment(postState.id, { content })
-      setComments((current) => [...current, response.payload.result])
+      const newComment = normalizeComment(response.payload.result)
+      setComments((current) => [...current, newComment])
       setCommentDraft('')
       setHasLoadedComments(true)
       setIsCommentsOpen(true)
@@ -238,6 +393,51 @@ export default function PostCard({ post, author, onShared }: PostCardProps) {
       setCommentError('Unable to post your comment right now.')
     } finally {
       setIsSubmittingComment(false)
+    }
+  }
+
+  const handleToggleCommentLike = async (commentId: string) => {
+    if (activeCommentLikeId) return
+
+    setActiveCommentLikeId(commentId)
+    setCommentError('')
+
+    try {
+      const response = await postApiRequest.toggleCommentLike(postState.id, commentId)
+      setComments((current) =>
+        updateCommentTree(current, commentId, (comment) => ({
+          ...comment,
+          likedByMe: response.payload.result.liked,
+          likeCount: response.payload.result.likeCount
+        }))
+      )
+    } catch {
+      setCommentError('Unable to update this comment right now.')
+    } finally {
+      setActiveCommentLikeId(null)
+    }
+  }
+
+  const handleReplyToComment = async (commentId: string, content: string) => {
+    if (activeReplyCommentId) return
+
+    setActiveReplyCommentId(commentId)
+    setCommentError('')
+
+    try {
+      const response = await postApiRequest.replyComment(postState.id, commentId, {
+        content
+      })
+      const reply = normalizeComment(response.payload.result)
+      setComments((current) => appendReplyToComment(current, commentId, reply))
+      setPostState((current) => ({
+        ...current,
+        commentCount: current.commentCount + 1
+      }))
+    } catch {
+      setCommentError('Unable to reply to this comment right now.')
+    } finally {
+      setActiveReplyCommentId(null)
     }
   }
 
@@ -367,7 +567,14 @@ export default function PostCard({ post, author, onShared }: PostCardProps) {
           ) : comments.length > 0 ? (
             <div className="space-y-3">
               {comments.map((comment) => (
-                <CommentItem key={comment.id} comment={comment} />
+                <CommentItem
+                  key={comment.id}
+                  comment={comment}
+                  onToggleLike={handleToggleCommentLike}
+                  onReply={handleReplyToComment}
+                  activeCommentLikeId={activeCommentLikeId}
+                  activeReplyCommentId={activeReplyCommentId}
+                />
               ))}
             </div>
           ) : (

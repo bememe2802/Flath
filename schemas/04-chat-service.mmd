@@ -1,0 +1,27 @@
+erDiagram
+    Conversation ||--o{ ChatMessage : contains
+
+    Conversation {
+        string id PK "ObjectId"
+        string type "GROUP | DIRECT"
+        string participantsHash "unique"
+        string participants "List<ParticipantInfo>"
+        date createdDate
+        date modifiedDate
+    }
+
+    ChatMessage {
+        string id PK "ObjectId"
+        string conversationId FK "indexed"
+        string message
+        string sender "ParticipantInfo"
+        date createdDate "indexed"
+    }
+
+    ParticipantInfo {
+        string userId
+        string username
+        string firstName
+        string lastName
+        string avatar
+    }

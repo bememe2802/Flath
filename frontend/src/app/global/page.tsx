@@ -1,38 +1,18 @@
-'use client'
-
-import { LoaderCircle } from 'lucide-react'
-import { useEffect, useState } from 'react'
-
-import studyApiRequest from '@/src/apiRequest/study'
-import { useAppContext } from '@/src/app/app-provider'
 import UserAvatar from '@/src/components/UserAvatar'
+import { serverApiRequest } from '@/src/lib/server-api'
 import { getProfileName } from '@/src/lib/presentation'
 import { formatDuration } from '@/src/lib/study'
-import type { StudyLeaderboardEntry } from '@/src/types/domain'
 
-export default function GlobalPage() {
-  const { profile, isReady } = useAppContext()
-  const [entries, setEntries] = useState<StudyLeaderboardEntry[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+export default async function GlobalPage() {
+  const [leaderboardRes, profileRes] = await Promise.all([
+    serverApiRequest.globalLeaderboard(50).catch(() => null),
+    serverApiRequest
+      .myProfile({ requireAuth: false, redirectOnUnauthorized: false })
+      .catch(() => null)
+  ])
 
-  useEffect(() => {
-    async function bootstrap() {
-      setIsLoading(true)
-
-      try {
-        const response = await studyApiRequest.globalLeaderboard(50)
-        setEntries(response.payload.result)
-      } catch {
-        setEntries([])
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    if (isReady) {
-      void bootstrap()
-    }
-  }, [isReady])
+  const entries = leaderboardRes?.result ?? []
+  const currentUserId = profileRes?.result.userId
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-10">
@@ -44,27 +24,23 @@ export default function GlobalPage() {
           </p>
         </div>
 
-        {isLoading ? (
-          <div className="flex min-h-80 items-center justify-center">
-            <LoaderCircle className="size-6 animate-spin text-gray-400" />
-          </div>
-        ) : entries.length > 0 ? (
+        {entries.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="border-b bg-gray-100 text-xs font-semibold uppercase text-gray-700">
                 <tr>
-                  <th className="px-6 py-3 w-[10%]">#</th>
-                  <th className="px-6 py-3 w-[30%]">Name</th>
-                  <th className="px-6 py-3 w-[20%]">City</th>
-                  <th className="px-6 py-3 w-[15%]">Weekly</th>
-                  <th className="px-6 py-3 w-[10%]">Streak</th>
-                  <th className="px-6 py-3 w-[15%] text-right">Total</th>
+                  <th className="w-[10%] px-6 py-3">#</th>
+                  <th className="w-[30%] px-6 py-3">Name</th>
+                  <th className="w-[20%] px-6 py-3">City</th>
+                  <th className="w-[15%] px-6 py-3">Weekly</th>
+                  <th className="w-[10%] px-6 py-3">Streak</th>
+                  <th className="w-[15%] px-6 py-3 text-right">Total</th>
                 </tr>
               </thead>
               <tbody>
                 {entries.map((entry, index) => {
                   const name = getProfileName(entry)
-                  const isCurrentUser = entry.userId === profile?.userId
+                  const isCurrentUser = entry.userId === currentUserId
 
                   return (
                     <tr

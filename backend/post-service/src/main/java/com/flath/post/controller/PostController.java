@@ -68,6 +68,21 @@ public class PostController {
                 .build();
     }
 
+    @PostMapping("/{postId}/comments/{commentId}/likes/toggle")
+    ApiResponse<PostReactionResponse> toggleCommentLike(@PathVariable String postId, @PathVariable String commentId) {
+        return ApiResponse.<PostReactionResponse>builder()
+                .result(postService.toggleCommentLike(postId, commentId))
+                .build();
+    }
+
+    @PostMapping("/{postId}/comments/{commentId}/replies")
+    ApiResponse<PostCommentResponse> replyToComment(
+            @PathVariable String postId, @PathVariable String commentId, @RequestBody CommentRequest request) {
+        return ApiResponse.<PostCommentResponse>builder()
+                .result(postService.replyToComment(postId, commentId, request))
+                .build();
+    }
+
     @PostMapping("/{postId}/share")
     ApiResponse<PostResponse> sharePost(@PathVariable String postId, @RequestBody(required = false) SharePostRequest request) {
         return ApiResponse.<PostResponse>builder()

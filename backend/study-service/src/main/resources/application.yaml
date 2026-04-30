@@ -6,6 +6,10 @@ server:
 spring:
   application:
     name: study-service
+  data:
+    redis:
+      host: localhost
+      port: 6379
   datasource:
     url: "jdbc:mysql://localhost:3306/backend_study?createDatabaseIfNotExist=true"
     driverClassName: "com.mysql.cj.jdbc.Driver"
