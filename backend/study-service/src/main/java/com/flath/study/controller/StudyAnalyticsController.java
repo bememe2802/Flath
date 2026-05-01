@@ -24,9 +24,9 @@ public class StudyAnalyticsController {
     StudyAnalyticsService studyAnalyticsService;
 
     @GetMapping("/stats/my-stats")
-    ApiResponse<StudyStatsResponse> getMyStats() {
+    ApiResponse<StudyStatsResponse> getMyStats(@RequestParam(defaultValue = "week") String chartType) {
         return ApiResponse.<StudyStatsResponse>builder()
-                .result(studyAnalyticsService.getMyStats())
+                .result(studyAnalyticsService.getMyStats(chartType))
                 .build();
     }
 

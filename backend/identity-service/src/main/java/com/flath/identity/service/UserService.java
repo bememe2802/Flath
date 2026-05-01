@@ -10,7 +10,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.flath.event.dto.NotificationEvent;
 import com.flath.identity.constant.PredefinedRole;
 import com.flath.identity.dto.request.UserCreationRequest;
 import com.flath.identity.dto.request.UserUpdateRequest;
@@ -69,14 +68,15 @@ public class UserService {
                 "3. Gọi Profile Service thành công. Profile ID: {}",
                 profile.getResult().getId());
 
-        NotificationEvent notificationEvent = NotificationEvent.builder()
-                .channel("EMAIL")
-                .recipient(request.getEmail())
-                .subject("Welcome To Flath!")
-                .body("Hello, " + request.getUsername())
-                .build();
-
-        kafkaTemplate.send("notification-delivery", notificationEvent);
+        // TODO: Uncomment khi notification service đã sẵn sàng
+        // NotificationEvent notificationEvent = NotificationEvent.builder()
+        //         .channel("EMAIL")
+        //         .recipient(request.getEmail())
+        //         .subject("Welcome To Flath!")
+        //         .body("Hello, " + request.getUsername())
+        //         .build();
+        //
+        // kafkaTemplate.send("notification-delivery", notificationEvent);
 
         var userCreationReponse = userMapper.toUserResponse(user);
         userCreationReponse.setId(profile.getResult().getId());

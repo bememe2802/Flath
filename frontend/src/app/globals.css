@@ -132,7 +132,7 @@
   }
 
   .page-shell {
-    @apply min-h-[calc(100vh-56px)] bg-gray-50 px-4 py-6 md:px-6 md:py-8;
+    @apply min-h-[calc(100vh-56px)] bg-muted/50 px-4 py-6 md:px-6 md:py-8;
   }
 
   .content-width {
@@ -140,26 +140,26 @@
   }
 
   .panel-card {
-    @apply rounded-xl border border-gray-200 bg-white shadow-sm;
+    @apply rounded-xl border bg-card text-card-foreground shadow-sm;
   }
 
   .panel-muted {
-    @apply rounded-xl border border-gray-200 bg-gray-50;
+    @apply rounded-xl border bg-muted/30;
   }
 
   .section-kicker {
-    @apply text-xs font-semibold uppercase tracking-[0.18em] text-gray-500;
+    @apply text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground;
   }
 
   .section-title {
-    @apply text-balance text-2xl font-semibold text-gray-900 md:text-3xl;
+    @apply text-balance text-2xl font-semibold text-foreground md:text-3xl;
   }
 
   .section-copy {
-    @apply text-sm leading-6 text-gray-600 md:text-base;
+    @apply text-sm leading-6 text-muted-foreground md:text-base;
   }
 
   .stat-chip {
-    @apply inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600;
+    @apply inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs font-medium text-muted-foreground;
   }
 }

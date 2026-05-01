@@ -14,8 +14,8 @@ const studyApiRequest = {
   }) => http.post<ApiEnvelope<StudySession>>('/study/sessions', body),
   mySessions: (limit = 30) =>
     http.get<ApiEnvelope<StudySession[]>>(`/study/sessions/my-sessions?limit=${limit}`),
-  myStats: () =>
-    http.get<ApiEnvelope<StudyStats>>('/study/stats/my-stats'),
+  myStats: (chartType = 'week') =>
+    http.get<ApiEnvelope<StudyStats>>(`/study/stats/my-stats?chartType=${chartType}`),
   globalLeaderboard: (limit = 20) =>
     http.get<ApiEnvelope<StudyLeaderboardEntry[]>>(
       `/study/leaderboard/global?limit=${limit}`

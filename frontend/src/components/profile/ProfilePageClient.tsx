@@ -1,10 +1,11 @@
 'use client'
 
-import { Camera, LoaderCircle, Save } from 'lucide-react'
+import { Camera, Globe, LoaderCircle, Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import postApiRequest from '@/src/apiRequest/post'
 import profileApiRequest from '@/src/apiRequest/profile'
+import LanguageSelector from '@/src/components/LanguageSelector'
 import PostCard from '@/src/components/PostCard'
 import UserAvatar from '@/src/components/UserAvatar'
 import { useAppContext } from '@/src/app/app-provider'
@@ -120,69 +121,72 @@ export default function ProfilePageClient({
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-6">
+    <main className="min-h-screen bg-muted/50 px-4 py-6">
       <div className="mx-auto w-full max-w-4xl space-y-4">
-        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <section className="panel-card p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
               <UserAvatar
                 src={currentProfile?.avatar}
                 name={profileName}
                 className="size-16"
-                fallbackClassName="bg-gray-900 text-white"
+                fallbackClassName="bg-foreground text-background"
               />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{profileName}</h1>
-                <p className="text-sm text-gray-500">
+                <h1 className="text-2xl font-bold text-foreground">{profileName}</h1>
+                <p className="text-sm text-muted-foreground">
                   @{currentProfile?.username ?? 'learner'}
                 </p>
               </div>
             </div>
 
-            <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-              <Camera className="size-4" />
-              Change avatar
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(event) => handleAvatarChange(event.target.files?.[0])}
-              />
-            </label>
+            <div className="flex items-center gap-3">
+              <LanguageSelector />
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border bg-card px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-accent">
+                <Camera className="size-4" />
+                Change avatar
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(event) => handleAvatarChange(event.target.files?.[0])}
+                />
+              </label>
+            </div>
           </div>
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Total hours</p>
-            <p className="mt-2 text-2xl font-semibold text-gray-900">
+          <div className="panel-card p-5">
+            <p className="text-sm text-muted-foreground">Total hours</p>
+            <p className="mt-2 text-2xl font-semibold text-foreground">
               {formatDuration(studyInsights.totalSeconds)}
             </p>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">This week</p>
-            <p className="mt-2 text-2xl font-semibold text-gray-900">
+          <div className="panel-card p-5">
+            <p className="text-sm text-muted-foreground">This week</p>
+            <p className="mt-2 text-2xl font-semibold text-foreground">
               {formatDuration(studyInsights.weekSeconds)}
             </p>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Streak</p>
-            <p className="mt-2 text-2xl font-semibold text-gray-900">
+          <div className="panel-card p-5">
+            <p className="text-sm text-muted-foreground">Streak</p>
+            <p className="mt-2 text-2xl font-semibold text-foreground">
               {studyInsights.streakDays} days
             </p>
           </div>
         </section>
 
-        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900">Personal information</h2>
+        <section className="panel-card p-6">
+          <h2 className="text-xl font-semibold text-foreground">Personal information</h2>
 
           {errorMessage ? (
-            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               {errorMessage}
             </div>
           ) : null}
 
-          <div className="mt-5 divide-y divide-gray-200 overflow-hidden rounded-xl border border-gray-200">
+          <div className="mt-5 divide-y overflow-hidden rounded-xl border">
             {(Object.keys(fieldLabels) as (keyof DraftProfile)[]).map((field) => {
               const isEditing = editingField === field
               const value = draft[field]
@@ -192,9 +196,9 @@ export default function ProfilePageClient({
               return (
                 <div
                   key={field}
-                  className="flex flex-col gap-3 bg-white px-5 py-4 md:flex-row md:items-center"
+                  className="flex flex-col gap-3 bg-card px-5 py-4 md:flex-row md:items-center"
                 >
-                  <div className="w-full max-w-40 text-sm text-gray-500">
+                  <div className="w-full max-w-40 text-sm text-muted-foreground">
                     {fieldLabels[field]}
                   </div>
 
@@ -209,12 +213,12 @@ export default function ProfilePageClient({
                             [field]: event.target.value
                           }))
                         }
-                        className="h-10 flex-1 rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none"
+                        className="h-10 flex-1 rounded-lg border bg-background px-3 text-sm outline-none"
                       />
                       <button
                         type="button"
                         onClick={() => void saveField()}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                         disabled={isSaving}
                       >
                         {isSaving ? (
@@ -229,12 +233,12 @@ export default function ProfilePageClient({
                     <button
                       type="button"
                       onClick={() => setEditingField(field)}
-                      className="flex flex-1 items-center justify-between rounded-lg px-3 py-2 text-left hover:bg-gray-50"
+                      className="flex flex-1 items-center justify-between rounded-lg px-3 py-2 text-left hover:bg-accent"
                     >
-                      <span className={value ? 'text-gray-900' : 'text-gray-400'}>
+                      <span className={value ? 'text-foreground' : 'text-muted-foreground/50'}>
                         {value || 'Not set yet'}
                       </span>
-                      <span className="text-xs font-medium uppercase tracking-[0.14em] text-gray-400">
+                      <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/50">
                         Edit
                       </span>
                     </button>
@@ -245,9 +249,9 @@ export default function ProfilePageClient({
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-          <div className="border-b border-gray-200 px-5 py-4">
-            <h2 className="text-xl font-semibold text-gray-900">Your posts</h2>
+        <section className="panel-card overflow-hidden">
+          <div className="border-b px-5 py-4">
+            <h2 className="text-xl font-semibold text-foreground">Your posts</h2>
           </div>
 
           {posts.length > 0 ? (
@@ -262,7 +266,7 @@ export default function ProfilePageClient({
               />
             ))
           ) : (
-            <div className="px-5 py-8 text-sm text-gray-500">
+            <div className="px-5 py-8 text-sm text-muted-foreground">
               You have not posted anything yet.
             </div>
           )}

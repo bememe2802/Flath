@@ -83,7 +83,7 @@ export default function RegisterForm() {
                 <Input
                   placeholder="Username"
                   autoComplete="username"
-                  className="h-11 rounded-2xl border-slate-200 bg-white"
+                  className="h-11 rounded-2xl border bg-background"
                   {...field}
                 />
               </FormControl>
@@ -102,7 +102,7 @@ export default function RegisterForm() {
                   placeholder="Email"
                   type="email"
                   autoComplete="email"
-                  className="h-11 rounded-2xl border-slate-200 bg-white"
+                  className="h-11 rounded-2xl border bg-background"
                   {...field}
                 />
               </FormControl>
@@ -121,7 +121,7 @@ export default function RegisterForm() {
                   placeholder="Password"
                   type="password"
                   autoComplete="new-password"
-                  className="h-11 rounded-2xl border-slate-200 bg-white"
+                  className="h-11 rounded-2xl border bg-background"
                   {...field}
                 />
               </FormControl>
@@ -140,7 +140,7 @@ export default function RegisterForm() {
                   placeholder="Confirm password"
                   type="password"
                   autoComplete="new-password"
-                  className="h-11 rounded-2xl border-slate-200 bg-white"
+                  className="h-11 rounded-2xl border bg-background"
                   {...field}
                 />
               </FormControl>
@@ -150,14 +150,14 @@ export default function RegisterForm() {
         />
 
         {errorMessage ? (
-          <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {errorMessage}
           </div>
         ) : null}
 
         <Button
           type="submit"
-          className="h-11 w-full rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+          className="h-11 w-full rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
           disabled={form.formState.isSubmitting}
         >
           {form.formState.isSubmitting ? 'Creating account...' : 'Create account'}

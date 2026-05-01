@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Bar,
   BarChart,
@@ -35,6 +35,12 @@ const focusModes = [
   { label: '90 min', minutes: 90 }
 ]
 
+const chartTabs = [
+  { key: 'week', label: 'Tuần' },
+  { key: 'month', label: 'Tháng' },
+  { key: 'year', label: 'Năm' }
+]
+
 export default function StudyPage() {
   const { profile, isReady } = useAppContext()
   const [selectedMinutes, setSelectedMinutes] = useState(25)
@@ -46,9 +52,11 @@ export default function StudyPage() {
   const [isSendingEmail, setIsSendingEmail] = useState(false)
   const [isLoadingStudy, setIsLoadingStudy] = useState(true)
   const [isSavingSession, setIsSavingSession] = useState(false)
+  const [chartType, setChartType] = useState('week')
   const sessionStartedAt = useRef<Date | null>(null)
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const loadStudyData = async (showLoading: boolean) => {
+  const loadStudyData = useCallback(async (showLoading: boolean, ct?: string) => {
     if (!isReady) return
 
     if (showLoading) {
@@ -56,8 +64,9 @@ export default function StudyPage() {
     }
 
     try {
+      const type = ct ?? chartType
       const [statsResponse, sessionsResponse] = await Promise.all([
-        studyApiRequest.myStats(),
+        studyApiRequest.myStats(type),
         studyApiRequest.mySessions(30)
       ])
 
@@ -72,14 +81,31 @@ export default function StudyPage() {
         setIsLoadingStudy(false)
       }
     }
-  }
+  }, [isReady, chartType])
 
+  // Initial load
   useEffect(() => {
     if (isReady) {
       void loadStudyData(true)
     }
-  }, [isReady])
+  }, [isReady, loadStudyData])
 
+  // Polling every 30s for real-time updates
+  useEffect(() => {
+    if (!isReady) return
+
+    pollingRef.current = setInterval(() => {
+      void loadStudyData(false)
+    }, 30000)
+
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current)
+      }
+    }
+  }, [isReady, loadStudyData])
+
+  // Timer logic
   useEffect(() => {
     if (!isRunning) return
 
@@ -215,17 +241,22 @@ export default function StudyPage() {
     }
   }
 
+  const handleChartTypeChange = (type: string) => {
+    setChartType(type)
+    void loadStudyData(true, type)
+  }
+
   const minutes = Math.floor(remainingSeconds / 60)
   const seconds = remainingSeconds % 60
   const chartData = buildStudyChartHours(insights.chart)
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-muted/50">
       <div className="flex">
-        <aside className="hidden w-60 border-r bg-white lg:flex lg:flex-col">
-          <div className="border-b p-4 text-lg font-bold text-blue-600">Study</div>
-          <div className="space-y-2 p-4 text-sm text-gray-700">
-            <div className="rounded-lg bg-blue-50 px-4 py-2 font-medium text-blue-700">
+        <aside className="hidden w-60 border-r bg-card lg:flex lg:flex-col">
+          <div className="border-b p-4 text-lg font-bold text-primary">Study</div>
+          <div className="space-y-2 p-4 text-sm text-foreground/70">
+            <div className="rounded-lg bg-primary/10 px-4 py-2 font-medium text-primary">
               Focus room
             </div>
             <div className="rounded-lg px-4 py-2">Hours today: {formatDuration(insights.todaySeconds)}</div>
@@ -236,9 +267,9 @@ export default function StudyPage() {
 
         <section className="flex-1 p-6">
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-xl font-semibold text-gray-800">Pomodoro Timer</h2>
-              <div className="mb-6 text-6xl font-bold text-gray-700">
+            <div className="rounded-xl border bg-card p-6 shadow-sm">
+              <h2 className="mb-4 text-xl font-semibold text-foreground">Pomodoro Timer</h2>
+              <div className="mb-6 text-6xl font-bold text-foreground/80">
                 {minutes.toString().padStart(2, '0')}:
                 {seconds.toString().padStart(2, '0')}
               </div>
@@ -255,8 +286,8 @@ export default function StudyPage() {
                       sessionStartedAt.current = null
                     }}
                     className={`rounded-lg px-4 py-2 text-sm transition ${selectedMinutes === mode.minutes
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-foreground/70 hover:bg-accent'
                       }`}
                   >
                     {mode.label}
@@ -269,7 +300,7 @@ export default function StudyPage() {
                   type="button"
                   onClick={isRunning ? pauseTimer : startTimer}
                   disabled={isSavingSession}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700 disabled:opacity-60"
+                  className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
                 >
                   {isRunning ? <Pause className="size-4" /> : <Play className="size-4" />}
                   {isRunning ? 'Pause' : 'Start'}
@@ -278,7 +309,7 @@ export default function StudyPage() {
                   type="button"
                   onClick={() => void saveCurrentProgress()}
                   disabled={isSavingSession}
-                  className="flex items-center gap-2 rounded-lg bg-gray-100 px-5 py-2 text-gray-700 hover:bg-gray-200 disabled:opacity-60"
+                  className="flex items-center gap-2 rounded-lg bg-muted px-5 py-2 text-foreground/70 hover:bg-accent disabled:opacity-60"
                 >
                   {isSavingSession ? (
                     <LoaderCircle className="size-4 animate-spin" />
@@ -290,7 +321,7 @@ export default function StudyPage() {
                 <button
                   type="button"
                   onClick={resetTimer}
-                  className="flex items-center gap-2 rounded-lg bg-gray-100 px-5 py-2 text-gray-700 hover:bg-gray-200"
+                  className="flex items-center gap-2 rounded-lg bg-muted px-5 py-2 text-foreground/70 hover:bg-accent"
                 >
                   <RotateCcw className="size-4" />
                   Reset
@@ -298,55 +329,76 @@ export default function StudyPage() {
               </div>
 
               {statusMessage ? (
-                <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                <div className="mt-4 rounded-lg border bg-muted/50 px-4 py-3 text-sm text-foreground/70">
                   {statusMessage}
                 </div>
               ) : null}
             </div>
 
-            <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold text-gray-800">Giờ học trong 7 ngày</h2>
+            <div className="rounded-xl border bg-card p-6 shadow-sm">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-foreground">Giờ học</h2>
+                <div className="flex gap-1 rounded-lg bg-muted p-1">
+                  {chartTabs.map((tab) => (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => handleChartTypeChange(tab.key)}
+                      className={`rounded-md px-3 py-1.5 text-sm transition ${chartType === tab.key
+                        ? 'bg-card text-primary shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="h-72">
                 {isLoadingStudy ? (
                   <div className="flex h-full items-center justify-center">
-                    <LoaderCircle className="size-6 animate-spin text-gray-400" />
+                    <LoaderCircle className="size-6 animate-spin text-muted-foreground/60" />
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData}>
-                      <XAxis dataKey="label" />
+                      <XAxis
+                        dataKey="label"
+                        tick={{ fontSize: 11 }}
+                        interval={chartType === 'month' ? Math.max(1, Math.floor(chartData.length / 15)) : 0}
+                      />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="hours" fill="#2563eb" radius={[6, 6, 0, 0]} />
+                      <Bar dataKey="hours" fill="var(--primary)" radius={[6, 6, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
               </div>
             </div>
 
-            <div className="rounded-xl border bg-white p-6 shadow-sm xl:col-span-2">
+            <div className="rounded-xl border bg-card p-6 shadow-sm xl:col-span-2">
               <div className="grid gap-4 md:grid-cols-4">
                 <div>
-                  <p className="text-sm text-gray-500">Today</p>
-                  <p className="mt-2 text-2xl font-semibold text-gray-900">
+                  <p className="text-sm text-muted-foreground">Today</p>
+                  <p className="mt-2 text-2xl font-semibold text-foreground">
                     {formatDuration(insights.todaySeconds)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Week</p>
-                  <p className="mt-2 text-2xl font-semibold text-gray-900">
+                  <p className="text-sm text-muted-foreground">Week</p>
+                  <p className="mt-2 text-2xl font-semibold text-foreground">
                     {formatDuration(insights.weekSeconds)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Month</p>
-                  <p className="mt-2 text-2xl font-semibold text-gray-900">
+                  <p className="text-sm text-muted-foreground">Month</p>
+                  <p className="mt-2 text-2xl font-semibold text-foreground">
                     {formatDuration(insights.monthSeconds)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Year</p>
-                  <p className="mt-2 text-2xl font-semibold text-gray-900">
+                  <p className="text-sm text-muted-foreground">Year</p>
+                  <p className="mt-2 text-2xl font-semibold text-foreground">
                     {formatDuration(insights.yearSeconds)}
                   </p>
                 </div>

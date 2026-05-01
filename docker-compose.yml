@@ -1,0 +1,287 @@
+name: flath
+
+services:
+  # ============ INFRASTRUCTURE ============
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: kafka
+    hostname: kafka
+    restart: always
+    ports:
+      - '9094:9094'
+    environment:
+      KAFKA_NODE_ID: 0
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    networks:
+      - flath-network
+
+  mongodb:
+    image: mongo:8.0.1-noble
+    container_name: mongodb
+    hostname: mongodb
+    restart: always
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    networks:
+      - flath-network
+
+  mysql:
+    image: mysql:8.0.40-debian
+    container_name: mysql
+    hostname: mysql
+    restart: always
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: backend_identity
+    networks:
+      - flath-network
+
+  neo4j:
+    image: neo4j:5.24.2
+    container_name: neo4j
+    hostname: neo4j
+    restart: always
+    ports:
+      - '7474:7474'
+      - '7687:7687'
+    environment:
+      - NEO4J_AUTH=neo4j/123456789
+    networks:
+      - flath-network
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: redis
+    hostname: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - flath-network
+
+  # ============ BACKEND SERVICES ============
+  identity-service:
+    build:
+      context: ./backend/identity-service
+      dockerfile: Dockerfile
+    container_name: identity-service
+    hostname: identity-service
+    restart: always
+    ports:
+      - '8080:8080'
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/backend_identity?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - mysql
+      - kafka
+    networks:
+      - flath-network
+
+  profile-service:
+    build:
+      context: ./backend/profile-service
+      dockerfile: Dockerfile
+    container_name: profile-service
+    hostname: profile-service
+    restart: always
+    ports:
+      - '8081:8081'
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:root@mongodb:27017/backend_profile?authSource=admin
+      SPRING_NEO4J_URI: bolt://neo4j:7687
+      SPRING_NEO4J_AUTHENTICATION_USERNAME: neo4j
+      SPRING_NEO4J_AUTHENTICATION_PASSWORD: 123456789
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - mongodb
+      - neo4j
+      - kafka
+    networks:
+      - flath-network
+
+  notification-service:
+    build:
+      context: ./backend/notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    hostname: notification-service
+    restart: always
+    ports:
+      - '8082:8082'
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:root@mongodb:27017/backend_notification?authSource=admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - mongodb
+      - kafka
+    networks:
+      - flath-network
+
+  post-service:
+    build:
+      context: ./backend/post-service
+      dockerfile: Dockerfile
+    container_name: post-service
+    hostname: post-service
+    restart: always
+    ports:
+      - '8083:8083'
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:root@mongodb:27017/backend_post?authSource=admin
+      SPRING_NEO4J_URI: bolt://neo4j:7687
+      SPRING_NEO4J_AUTHENTICATION_USERNAME: neo4j
+      SPRING_NEO4J_AUTHENTICATION_PASSWORD: 123456789
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - mongodb
+      - neo4j
+      - kafka
+    networks:
+      - flath-network
+
+  file-service:
+    build:
+      context: ./backend/file-service
+      dockerfile: Dockerfile
+    container_name: file-service
+    hostname: file-service
+    restart: always
+    ports:
+      - '8084:8084'
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:root@mongodb:27017/backend_file?authSource=admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - mongodb
+      - kafka
+    networks:
+      - flath-network
+
+  chat-service:
+    build:
+      context: ./backend/chat-service
+      dockerfile: Dockerfile
+    container_name: chat-service
+    hostname: chat-service
+    restart: always
+    ports:
+      - '8085:8085'
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:root@mongodb:27017/backend_chat?authSource=admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - mongodb
+      - kafka
+    networks:
+      - flath-network
+
+  study-service:
+    build:
+      context: ./backend/study-service
+      dockerfile: Dockerfile
+    container_name: study-service
+    hostname: study-service
+    restart: always
+    ports:
+      - '8086:8086'
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/backend_study?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      APP_SERVICES_PROFILE_URL: http://profile-service:8081/profile
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - flath-network
+
+  newsfeed-service:
+    build:
+      context: ./backend/newsfeed-service
+      dockerfile: Dockerfile
+    container_name: newsfeed-service
+    hostname: newsfeed-service
+    restart: always
+    ports:
+      - '8087:8087'
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:root@mongodb:27017/backend_newsfeed?authSource=admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - mongodb
+      - kafka
+    networks:
+      - flath-network
+
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    hostname: api-gateway
+    restart: always
+    ports:
+      - '8888:8888'
+    environment:
+      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://identity-service:8080
+      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://profile-service:8081
+      SPRING_CLOUD_GATEWAY_ROUTES_2_URI: http://notification-service:8082
+      SPRING_CLOUD_GATEWAY_ROUTES_3_URI: http://post-service:8083
+      SPRING_CLOUD_GATEWAY_ROUTES_4_URI: http://file-service:8084
+      SPRING_CLOUD_GATEWAY_ROUTES_5_URI: http://chat-service:8085
+      SPRING_CLOUD_GATEWAY_ROUTES_6_URI: http://study-service:8086
+      SPRING_CLOUD_GATEWAY_ROUTES_7_URI: http://newsfeed-service:8087
+    depends_on:
+      - identity-service
+      - profile-service
+      - notification-service
+      - post-service
+      - file-service
+      - chat-service
+      - study-service
+      - newsfeed-service
+    networks:
+      - flath-network
+
+  # ============ FRONTEND ============
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    hostname: frontend
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      NEXT_PUBLIC_API_ENDPOINT: http://api-gateway:8888/api/v1
+      NEXT_PUBLIC_URL: http://localhost:3000
+    depends_on:
+      - api-gateway
+    networks:
+      - flath-network
+
+networks:
+  flath-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local

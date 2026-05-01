@@ -3,9 +3,11 @@ package com.flath.study.service;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -34,7 +36,11 @@ public class StudyAnalyticsService {
     StudyLeaderboardCacheService studyLeaderboardCacheService;
 
     public StudyStatsResponse getMyStats() {
-        return buildStats(studySessionService.getCurrentUserSessions());
+        return buildStats(studySessionService.getCurrentUserSessions(), "week");
+    }
+
+    public StudyStatsResponse getMyStats(String chartType) {
+        return buildStats(studySessionService.getCurrentUserSessions(), chartType);
     }
 
     public List<StudyLeaderboardEntryResponse> getGlobalLeaderboard(int limit) {
@@ -59,7 +65,7 @@ public class StudyAnalyticsService {
     }
 
     private StudyLeaderboardEntryResponse buildLeaderboardEntry(String userId) {
-        StudyStatsResponse stats = buildStats(studySessionService.getSessionsForUser(userId));
+        StudyStatsResponse stats = buildStats(studySessionService.getSessionsForUser(userId), "week");
         UserProfileResponse profile = getProfile(userId);
 
         return StudyLeaderboardEntryResponse.builder()
@@ -92,7 +98,7 @@ public class StudyAnalyticsService {
                 .build();
     }
 
-    private StudyStatsResponse buildStats(List<StudySession> sessions) {
+    private StudyStatsResponse buildStats(List<StudySession> sessions, String chartType) {
         ZoneId zoneId = ZoneId.systemDefault();
         LocalDate today = LocalDate.now(zoneId);
         LocalDate weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
@@ -138,16 +144,7 @@ public class StudyAnalyticsService {
             }
         }
 
-        List<StudyChartPointResponse> chart = java.util.stream.IntStream.rangeClosed(0, 6)
-                .mapToObj(index -> {
-                    LocalDate date = today.minusDays(6L - index);
-                    return StudyChartPointResponse.builder()
-                            .dateKey(date.toString())
-                            .label(date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH))
-                            .totalSeconds(dailyTotals.getOrDefault(date, 0L))
-                            .build();
-                })
-                .toList();
+        List<StudyChartPointResponse> chart = buildChart(dailyTotals, today, chartType);
 
         return StudyStatsResponse.builder()
                 .totalSeconds(totalSeconds)
@@ -158,5 +155,63 @@ public class StudyAnalyticsService {
                 .streakDays(streakDays)
                 .chart(chart)
                 .build();
+    }
+
+    private List<StudyChartPointResponse> buildChart(
+            Map<LocalDate, Long> dailyTotals, LocalDate today, String chartType) {
+        if ("month".equals(chartType)) {
+            return buildMonthlyChart(dailyTotals, today);
+        } else if ("year".equals(chartType)) {
+            return buildYearlyChart(dailyTotals, today);
+        }
+        return buildWeeklyChart(dailyTotals, today);
+    }
+
+    private List<StudyChartPointResponse> buildWeeklyChart(Map<LocalDate, Long> dailyTotals, LocalDate today) {
+        LocalDate monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        List<StudyChartPointResponse> result = new ArrayList<>();
+        for (int index = 0; index < 7; index++) {
+            LocalDate date = monday.plusDays(index);
+            result.add(StudyChartPointResponse.builder()
+                    .dateKey(date.toString())
+                    .label(date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.of("vi", "VN")))
+                    .totalSeconds(dailyTotals.getOrDefault(date, 0L))
+                    .build());
+        }
+        return result;
+    }
+
+    private List<StudyChartPointResponse> buildMonthlyChart(Map<LocalDate, Long> dailyTotals, LocalDate today) {
+        int daysInMonth = today.lengthOfMonth();
+        List<StudyChartPointResponse> result = new ArrayList<>();
+        for (int day = 1; day <= daysInMonth; day++) {
+            LocalDate date = today.withDayOfMonth(day);
+            result.add(StudyChartPointResponse.builder()
+                    .dateKey(date.toString())
+                    .label(String.valueOf(day))
+                    .totalSeconds(dailyTotals.getOrDefault(date, 0L))
+                    .build());
+        }
+        return result;
+    }
+
+    private List<StudyChartPointResponse> buildYearlyChart(Map<LocalDate, Long> dailyTotals, LocalDate today) {
+        List<StudyChartPointResponse> result = new ArrayList<>();
+        for (int month = 1; month <= 12; month++) {
+            Month m = Month.of(month);
+            // Aggregate all days in this month
+            long monthTotal = 0;
+            int daysInMonth = java.time.YearMonth.of(today.getYear(), month).lengthOfMonth();
+            for (int day = 1; day <= daysInMonth; day++) {
+                LocalDate date = today.withMonth(month).withDayOfMonth(day);
+                monthTotal += dailyTotals.getOrDefault(date, 0L);
+            }
+            result.add(StudyChartPointResponse.builder()
+                    .dateKey(String.format("%d-%02d", today.getYear(), month))
+                    .label(m.getDisplayName(TextStyle.SHORT, Locale.of("vi", "VN")))
+                    .totalSeconds(monthTotal)
+                    .build());
+        }
+        return result;
     }
 }

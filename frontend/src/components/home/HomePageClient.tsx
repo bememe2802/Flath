@@ -28,7 +28,7 @@ export default function HomePageClient({
   })
 
   return (
-    <main className="min-h-screen bg-white px-4 pb-10 pt-6">
+    <main className="min-h-screen bg-background px-4 pb-10 pt-6">
       <div className="mx-auto w-full max-w-4xl space-y-4">
         <FeedComposer
           onPosted={(createdPost) => {
@@ -36,9 +36,9 @@ export default function HomePageClient({
           }}
         />
 
-        <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        <section className="panel-card overflow-hidden">
           {feedError ? (
-            <div className="p-6 text-sm text-red-600">{feedError}</div>
+            <div className="p-6 text-sm text-destructive">{feedError}</div>
           ) : posts.length > 0 ? (
             posts.map((post) => (
               <PostCard
@@ -51,10 +51,10 @@ export default function HomePageClient({
             ))
           ) : (
             <div className="py-10 text-center">
-              <p className="text-lg font-semibold text-slate-900">
+              <p className="text-lg font-semibold text-foreground">
                 The feed is empty for now.
               </p>
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-muted-foreground">
                 Publish the first study update and it will appear here at the top.
               </p>
             </div>

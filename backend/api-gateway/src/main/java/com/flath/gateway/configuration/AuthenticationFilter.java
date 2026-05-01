@@ -38,7 +38,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @NonFinal
     private String[] publicEndpoints = {
-            "/identity/auth/.*",
+            "/identity/auth/token",
+            "/identity/auth/introspect",
             "/identity/users/registration",
             "/notification/email/send",
             "/file/media/download/.*",
@@ -78,8 +79,17 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     private boolean isPublicEndpoint(ServerHttpRequest request){
-        return Arrays.stream(publicEndpoints)
-                .anyMatch(s -> request.getURI().getPath().matches(apiPrefix + s));
+        String path = request.getURI().getPath();
+        log.info("Checking public endpoint for path: {}", path);
+        boolean isPublic = Arrays.stream(publicEndpoints)
+                .anyMatch(s -> {
+                    String pattern = apiPrefix + s;
+                    boolean matches = path.matches(pattern);
+                    log.info("  Pattern: {} -> {}", pattern, matches);
+                    return matches;
+                });
+        log.info("  Is public: {}", isPublic);
+        return isPublic;
     }
 
     Mono<Void> unauthenticated(ServerHttpResponse response){

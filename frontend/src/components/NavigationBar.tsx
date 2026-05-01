@@ -43,14 +43,14 @@ export default function NavigationBar() {
 
   if (!isReady) {
     return (
-      <nav className="sticky top-0 z-50 flex h-14 items-center border-b bg-white px-6 shadow-sm">
-        <div className="h-8 w-32 animate-pulse rounded bg-gray-100" />
+      <nav className="sticky top-0 z-50 flex h-14 items-center border-b bg-background px-6 shadow-sm">
+        <div className="h-8 w-32 animate-pulse rounded bg-muted" />
       </nav>
     )
   }
 
   return (
-    <nav className="sticky top-0 z-50 flex h-14 items-center border-b bg-white px-6 shadow-sm">
+    <nav className="sticky top-0 z-50 flex h-14 items-center border-b bg-background px-6 shadow-sm">
       <div className="flex items-center">
         <Link href="/">
           <img
@@ -61,7 +61,7 @@ export default function NavigationBar() {
         </Link>
       </div>
 
-      <div className="ml-10 flex flex-grow items-center gap-6 overflow-x-auto text-sm font-medium text-gray-700">
+      <div className="ml-10 flex flex-grow items-center gap-6 overflow-x-auto text-sm font-medium text-muted-foreground">
         {navLinks.map((link) => {
           const isActive =
             pathname === link.href ||
@@ -71,7 +71,7 @@ export default function NavigationBar() {
             <Link
               key={link.href}
               href={link.href}
-              className={isActive ? 'text-blue-600' : 'hover:text-blue-600'}
+              className={isActive ? 'text-primary' : 'hover:text-primary'}
             >
               {link.label}
             </Link>
@@ -83,7 +83,7 @@ export default function NavigationBar() {
         {profile ? <NotificationBell /> : null}
         {profile ? <ChatDock /> : null}
         <ModeToggle />
-        <Link href="/me" className="flex items-center gap-2 text-sm text-gray-700">
+        <Link href="/me" className="flex items-center gap-2 text-sm text-muted-foreground">
           {profile?.avatar ? (
             <img
               src={profile.avatar}
@@ -91,7 +91,7 @@ export default function NavigationBar() {
               className="h-8 w-8 rounded-full border object-cover"
             />
           ) : (
-            <span className="flex h-8 w-8 items-center justify-center rounded-full border bg-gray-100 text-xs font-semibold text-gray-700">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full border bg-muted text-xs font-semibold text-muted-foreground">
               {initials}
             </span>
           )}
@@ -99,7 +99,7 @@ export default function NavigationBar() {
         <button
           type="button"
           onClick={handleLogout}
-          className="text-sm font-medium text-gray-700 hover:text-blue-600"
+          className="text-sm font-medium text-muted-foreground hover:text-primary"
         >
           Sign out
         </button>

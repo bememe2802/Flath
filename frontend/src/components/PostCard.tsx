@@ -139,14 +139,14 @@ function PostBody({
           src={avatar}
           name={profileName}
           className={compact ? 'size-9' : 'size-10'}
-          fallbackClassName="bg-gray-900 text-white"
+          fallbackClassName="bg-foreground text-background"
         />
 
         <div className="min-w-0 flex-1">
-          <p className={compact ? 'font-medium text-gray-800' : 'font-semibold text-gray-800'}>
+          <p className={compact ? 'font-medium text-foreground' : 'font-semibold text-foreground'}>
             {profileName}
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             {formatRelativeTime(post.createdDate || post.created)}
             {username ? ` · @${username}` : ''}
             {city ? ` · ${city}` : ''}
@@ -154,7 +154,7 @@ function PostBody({
         </div>
       </div>
 
-      <p className="whitespace-pre-wrap text-[15px] leading-7 text-gray-700">
+      <p className="whitespace-pre-wrap text-[15px] leading-7 text-foreground/80">
         {message}
       </p>
 
@@ -166,7 +166,7 @@ function PostBody({
                 key={url}
                 src={url}
                 alt="Post attachment"
-                className="max-h-[420px] w-full rounded-xl border border-gray-200 object-cover"
+                className="max-h-[420px] w-full rounded-xl border object-cover"
               />
             ) : (
               <a
@@ -174,7 +174,7 @@ function PostBody({
                 href={url}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-100"
+                className="rounded-xl border bg-muted/50 px-4 py-3 text-sm text-muted-foreground transition hover:bg-accent"
               >
                 Open attachment
               </a>
@@ -184,7 +184,7 @@ function PostBody({
       ) : null}
 
       {post.sharedPost ? (
-        <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+        <div className="rounded-xl border bg-muted/50 p-4">
           <PostBody post={post.sharedPost} compact />
         </div>
       ) : null}
@@ -218,17 +218,17 @@ function CommentItem({
           src={comment.avatar}
           name={profileName}
           className="size-8"
-          fallbackClassName="bg-gray-900 text-white"
+          fallbackClassName="bg-foreground text-background"
         />
         <div className="min-w-0 flex-1">
-          <div className="rounded-xl bg-gray-50 px-4 py-3">
+          <div className="rounded-xl bg-muted/50 px-4 py-3">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium text-gray-800">{profileName}</span>
-              <span className="text-xs text-gray-500">
+              <span className="text-sm font-medium text-foreground">{profileName}</span>
+              <span className="text-xs text-muted-foreground">
                 {formatRelativeTime(comment.createdDate || comment.created)}
               </span>
             </div>
-            <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-gray-700">
+            <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-foreground/80">
               {comment.content}
             </p>
           </div>
@@ -238,22 +238,21 @@ function CommentItem({
               type="button"
               onClick={() => void onToggleLike(comment.id)}
               disabled={isTogglingLike}
-              className={`font-medium transition ${
-                comment.likedByMe
-                  ? 'text-red-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              className={`font-medium transition ${comment.likedByMe
+                ? 'text-destructive'
+                : 'text-muted-foreground hover:text-foreground'
+                }`}
             >
               {isTogglingLike ? 'Liking...' : 'Like'}
             </button>
             <button
               type="button"
               onClick={() => setIsReplyOpen((current) => !current)}
-              className="font-medium text-gray-500 transition hover:text-gray-700"
+              className="font-medium text-muted-foreground transition hover:text-foreground"
             >
               Reply
             </button>
-            <span className="text-gray-400">
+            <span className="text-muted-foreground/60">
               {comment.likeCount} {comment.likeCount === 1 ? 'like' : 'likes'}
             </span>
           </div>
@@ -264,7 +263,7 @@ function CommentItem({
                 value={replyDraft}
                 onChange={(event) => setReplyDraft(event.target.value)}
                 placeholder="Write a reply..."
-                className="min-h-16 flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm leading-6 text-gray-700 outline-none transition focus:border-blue-500"
+                className="min-h-16 flex-1 resize-none rounded-xl border bg-background px-3 py-2 text-sm leading-6 text-foreground outline-none transition focus:border-primary"
               />
               <button
                 type="button"
@@ -276,7 +275,7 @@ function CommentItem({
                   setIsReplyOpen(false)
                 }}
                 disabled={isReplying || !replyDraft.trim()}
-                className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-3 text-xs font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isReplying ? 'Sending...' : 'Reply'}
               </button>
@@ -284,7 +283,7 @@ function CommentItem({
           ) : null}
 
           {comment.replies.length > 0 ? (
-            <div className="mt-3 space-y-3 border-l border-gray-200 pl-4">
+            <div className="mt-3 space-y-3 border-l pl-4">
               {comment.replies.map((reply) => (
                 <CommentItem
                   key={reply.id}
@@ -465,27 +464,26 @@ export default function PostCard({ post, author, onShared }: PostCardProps) {
     postState.likeCount + postState.commentCount + postState.shareCount
 
   return (
-    <article className="border-b border-gray-200 px-5 py-5 first:pt-5 last:border-b-0">
+    <article className="border-b px-5 py-5 first:pt-5 last:border-b-0">
       <PostBody post={postState} author={author} />
 
       {totalEngagement > 0 ? (
-        <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-gray-500">
+        <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
           <span>{postState.likeCount} likes</span>
           <span>{postState.commentCount} comments</span>
           <span>{postState.shareCount} shares</span>
         </div>
       ) : null}
 
-      <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-gray-100 pt-4 text-sm">
+      <div className="mt-4 flex flex-wrap items-center gap-2 border-t pt-4 text-sm">
         <button
           type="button"
           onClick={() => void handleLike()}
           disabled={isTogglingLike}
-          className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 transition ${
-            postState.likedByMe
-              ? 'bg-red-50 text-red-600'
-              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
-          }`}
+          className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 transition ${postState.likedByMe
+            ? 'bg-destructive/10 text-destructive'
+            : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+            }`}
         >
           {isTogglingLike ? (
             <LoaderCircle className="size-4 animate-spin" />
@@ -500,11 +498,10 @@ export default function PostCard({ post, author, onShared }: PostCardProps) {
         <button
           type="button"
           onClick={() => void handleToggleComments()}
-          className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 transition ${
-            isCommentsOpen
-              ? 'bg-blue-50 text-blue-600'
-              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
-          }`}
+          className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 transition ${isCommentsOpen
+            ? 'bg-primary/10 text-primary'
+            : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+            }`}
         >
           <MessageCircle className="size-4" />
           Comment
@@ -514,7 +511,7 @@ export default function PostCard({ post, author, onShared }: PostCardProps) {
           type="button"
           onClick={() => void handleShare()}
           disabled={isSharing}
-          className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSharing ? (
             <LoaderCircle className="size-4 animate-spin" />
@@ -526,25 +523,25 @@ export default function PostCard({ post, author, onShared }: PostCardProps) {
       </div>
 
       {actionError ? (
-        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="mt-3 rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {actionError}
         </div>
       ) : null}
 
       {isCommentsOpen ? (
-        <div className="mt-4 space-y-4 rounded-xl border border-gray-200 bg-white p-4">
+        <div className="mt-4 space-y-4 rounded-xl border bg-card p-4">
           <div className="flex gap-3">
             <textarea
               value={commentDraft}
               onChange={(event) => setCommentDraft(event.target.value)}
               placeholder="Write a comment..."
-              className="min-h-20 flex-1 resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm leading-6 text-gray-700 outline-none transition focus:border-blue-500"
+              className="min-h-20 flex-1 resize-none rounded-xl border bg-background px-4 py-3 text-sm leading-6 text-foreground outline-none transition focus:border-primary"
             />
             <button
               type="button"
               onClick={() => void handleSubmitComment()}
               disabled={isSubmittingComment || !commentDraft.trim()}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmittingComment ? (
                 <LoaderCircle className="size-4 animate-spin" />
@@ -555,14 +552,14 @@ export default function PostCard({ post, author, onShared }: PostCardProps) {
           </div>
 
           {commentError ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               {commentError}
             </div>
           ) : null}
 
           {isLoadingComments ? (
             <div className="flex justify-center py-4">
-              <LoaderCircle className="size-5 animate-spin text-gray-400" />
+              <LoaderCircle className="size-5 animate-spin text-muted-foreground/60" />
             </div>
           ) : comments.length > 0 ? (
             <div className="space-y-3">
@@ -578,7 +575,7 @@ export default function PostCard({ post, author, onShared }: PostCardProps) {
               ))}
             </div>
           ) : (
-            <div className="rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-500">
+            <div className="rounded-xl bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
               No comments yet.
             </div>
           )}

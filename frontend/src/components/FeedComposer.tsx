@@ -56,13 +56,13 @@ export default function FeedComposer({ onPosted }: FeedComposerProps) {
   }
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <section className="panel-card p-5">
       <div className="flex gap-3">
         <UserAvatar
           src={profile?.avatar}
           name={profileName}
           className="size-10"
-          fallbackClassName="bg-gray-900 text-white"
+          fallbackClassName="bg-foreground text-background"
         />
 
         <div className="min-w-0 flex-1 space-y-4">
@@ -70,16 +70,16 @@ export default function FeedComposer({ onPosted }: FeedComposerProps) {
             value={content}
             onChange={(event) => setContent(event.target.value)}
             placeholder="Write a study update..."
-            className="min-h-24 w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm leading-6 text-gray-700 outline-none transition focus:border-blue-500"
+            className="min-h-24 w-full resize-none rounded-xl border bg-background px-4 py-3 text-sm leading-6 text-foreground outline-none transition focus:border-primary"
           />
 
           {selectedFile ? (
-            <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+            <div className="flex items-center justify-between rounded-xl border bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
               <span className="truncate">{selectedFile.name}</span>
               <button
                 type="button"
                 onClick={() => setSelectedFile(null)}
-                className="rounded-full p-1 transition hover:bg-white"
+                className="rounded-full p-1 transition hover:bg-background"
               >
                 <X className="size-4" />
               </button>
@@ -87,7 +87,7 @@ export default function FeedComposer({ onPosted }: FeedComposerProps) {
           ) : null}
 
           {errorMessage ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               {errorMessage}
             </div>
           ) : null}
@@ -97,7 +97,7 @@ export default function FeedComposer({ onPosted }: FeedComposerProps) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-blue-600"
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary"
               >
                 <ImagePlus className="size-3.5" />
                 Attach file
@@ -114,7 +114,7 @@ export default function FeedComposer({ onPosted }: FeedComposerProps) {
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting || (!content.trim() && !selectedFile)}
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? (
                 <LoaderCircle className="size-4 animate-spin" />
