@@ -13,15 +13,15 @@ spring:
         - id: identity_service
           uri: http://identity-service:8080
           predicates:
-          - Path=${app.api-prefix}/identity/**,/identity/**
+            - Path=${app.api-prefix}/identity/**,/identity/**
           filters:
-          - StripPrefix=0
+            - StripPrefix=0
         - id: profile_service
           uri: http://profile-service:8081
           predicates:
-          - Path=${app.api-prefix}/profile/users/**,/profile/users/**
+            - Path=${app.api-prefix}/profile/users/**,/profile/users/**
           filters:
-          - StripPrefix=0
+            - StripPrefix=0
         - id: notification_service
           uri: http://notification-service:8082
           predicates:
