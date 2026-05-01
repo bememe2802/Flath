@@ -13,54 +13,54 @@ spring:
         - id: identity_service
           uri: http://identity-service:8080
           predicates:
-          - Path=${app.api-prefix}/identity/**
+          - Path=${app.api-prefix}/identity/**,/identity/**
           filters:
-          - StripPrefix=2
+          - StripPrefix=1
         - id: profile_service
           uri: http://profile-service:8081
           predicates:
-          - Path=${app.api-prefix}/profile/users/**
+          - Path=${app.api-prefix}/profile/users/**,/profile/users/**
           filters:
-          - StripPrefix=2
+          - StripPrefix=1
         - id: notification_service
           uri: http://notification-service:8082
           predicates:
-            - Path=${app.api-prefix}/notification/**
+            - Path=${app.api-prefix}/notification/**,/notification/**
           filters:
-            - StripPrefix=2
+            - StripPrefix=1
         - id: post_service
           uri: http://post-service:8083
           predicates:
-            - Path=${app.api-prefix}/post/**
+            - Path=${app.api-prefix}/post/**,/post/**
           filters:
-            - StripPrefix=2
+            - StripPrefix=1
         - id: file_service
           uri: http://file-service:8084
           predicates:
-            - Path=${app.api-prefix}/file/**
+            - Path=${app.api-prefix}/file/**,/file/**
           filters:
-            - StripPrefix=2
+            - StripPrefix=1
         - id: chat_websocket_service
           uri: ws://chat-service:8085
           predicates:
-            - Path=${app.api-prefix}/chat/ws,${app.api-prefix}/chat/ws/**
+            - Path=${app.api-prefix}/chat/ws,${app.api-prefix}/chat/ws/**,/chat/ws,/chat/ws/**
           filters:
-            - StripPrefix=2
+            - StripPrefix=1
         - id: chat_service
           uri: http://chat-service:8085
           predicates:
-            - Path=${app.api-prefix}/chat/**
+            - Path=${app.api-prefix}/chat/**,/chat/**
           filters:
-            - StripPrefix=2
+            - StripPrefix=1
         - id: study_service
           uri: http://study-service:8086
           predicates:
-            - Path=${app.api-prefix}/study/**
+            - Path=${app.api-prefix}/study/**,/study/**
           filters:
-            - StripPrefix=2
+            - StripPrefix=1
         - id: newsfeed_service
           uri: http://newsfeed-service:8087
           predicates:
-            - Path=${app.api-prefix}/newsfeed/**
+            - Path=${app.api-prefix}/newsfeed/**,/newsfeed/**
           filters:
-            - StripPrefix=2
+            - StripPrefix=1
