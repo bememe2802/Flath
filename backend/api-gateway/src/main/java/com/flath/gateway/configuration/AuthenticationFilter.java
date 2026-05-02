@@ -46,9 +46,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/chat/ws(?:/.*)?"
     };
 
-    @Value("${app.api-prefix}")
     @NonFinal
-    private String apiPrefix;
+    private String apiPrefix = "/api/v1";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
